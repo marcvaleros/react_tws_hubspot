@@ -114,10 +114,7 @@ function App() {
     saveAs(blob, `COMPANY_${fileInfo.name}`);
   }
 
-  const desiredColumns = [
-    "Name", "Project Title", "Role", "Company", "Phone", "Email", "Website",
-    "Project Description", "Building Uses", "Project Types", "Project Category",
-    "Address", "City", "State", "ZIP"];
+  const desiredColumns = ["Name", "Project Title", "Role", "Company", "Phone", "Email", "Website","Project Description", "Building Uses", "Project Types", "Project Category","Address", "City", "State", "ZIP"];
 
   const desiredCompanyColumn = ["Company", "Website", "Domain"];  
 
@@ -200,7 +197,7 @@ function App() {
             onClick={filterCSV}
             disabled={isFiltered}
           >
-            <p className='font-hs-font'>Convert Raw to Final Format</p>
+            <p className='font-hs-font'>Filter File</p>
           </button>
           <button className='bg-hs-orange p-4 rounded-md text-hs-background hover:bg-hs-orange-light'>
             <p className='font-hs-font'>Import File to TWS Hubspot</p>
