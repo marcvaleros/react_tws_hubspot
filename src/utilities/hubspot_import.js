@@ -1,15 +1,14 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-const HUBSPOT_BASE_URL ="https://api.hubapi.com/crm/v3/imports/";
+// const BASE_URL ="https://23df-49-145-105-208.ngrok-free.app";
+const BASE_URL ="http://localhost:8080";
 
 
 async function importToHubspot (fileName, contactBlob, companyBlob) {
 
-  
   let importRequest = {
     "name": 'Construct Connect Outreach Leads V1',
-    // "importOperations": {"0-1": "CREATE"},              
     "files": [
     {
       "fileName": `Construct Connect Contacts.csv`,
@@ -133,35 +132,24 @@ async function importToHubspot (fileName, contactBlob, companyBlob) {
     }
   ]
 
-
   }
-  let data = new FormData();
-  data.append('files', contactBlob, 'Construct Connect Contacts.csv');
-  data.append('files', companyBlob, 'Construct Connect Company.csv');
-  data.append('importRequest', JSON.stringify(importRequest));
-
-  let config = {
-    method: 'post',
-    maxBodyLength: Infinity,
-    url: HUBSPOT_BASE_URL,
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'Accept':'application/json',
-      'Authorization': `Bearer ${process.env.HUBSPOT_API_KEY}`,
-    },
-    data: data
-  };
+  let form = new FormData();
+  form.append('files', contactBlob, 'Construct Connect Contacts.csv');
+  form.append('files', companyBlob, 'Construct Connect Company.csv');
+  form.append('importRequest', JSON.stringify(importRequest));
 
   try {
-    const res = await axios(config);
-    console.log("Successfully Imported To HubSpot");
-    return res.data
+    const res = await axios.post(`${BASE_URL}/api/import`, form, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    console.log("Successfully Connected to Server", res.status);
   } catch (error) {
-    console.log("Error Importing to Hubspot",error);
+    console.log("Error Importing to Hubspot", error.response ? error.response.data : error.message);
   } 
 
 
 }
-
 
 export default importToHubspot 
