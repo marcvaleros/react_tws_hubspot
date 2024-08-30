@@ -2,6 +2,7 @@ import './App.css';
 import React, { useState} from 'react';
 import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
+import importToHubspot from './utilities/hubspot_import';
 
 function App() {
   const [fileData, setFileData] = useState([]);
@@ -77,11 +78,27 @@ function App() {
       if(!uniqueCompanies[data.Company]){
         uniqueCompanies[data.Company] = true;
         let domain = getDomainName(data.Email, data.Website);
-        companyArray.push({Company: data.Company, Website: data.Website, Domain: domain});
+        companyArray.push({"Company ID": data["Company ID"],Company: data.Company, Website: data.Website, Domain: domain});
       }
     });
 
     setCompanyData(companyArray);
+  }
+
+  const importFile = async () => {
+    try {
+      const csvContactData = Papa.unparse(filteredData,{ columns: desiredColumns });
+      const csvCompanyData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
+      const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
+      const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
+
+      const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob);
+      console.log(res);
+      
+    } catch (error) {
+      console.log("Error Detected", error);
+      
+    }
   }
 
   const getDomainName = (email, website) => {
@@ -114,9 +131,11 @@ function App() {
     saveAs(blob, `COMPANY_${fileInfo.name}`);
   }
 
+
+
   const desiredColumns = ["Name", "Project Title", "Role", "Company", "Phone", "Email", "Website","Project Description", "Building Uses", "Project Types", "Project Category","Address", "City", "State", "ZIP"];
 
-  const desiredCompanyColumn = ["Company", "Website", "Domain"];  
+  const desiredCompanyColumn = ["Company ID","Company", "Website", "Domain"];  
 
   const zip_codes = [
     "90002", "90027", "90028", "90038", "90046", "90048", "90049", "90059", "90061",
@@ -182,8 +201,6 @@ function App() {
           </label>
       </div>
    
-
-      
         {isFiltered && (
           <div className='flex flex-row gap-2'>
             <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Associated Company CSV</button>
@@ -199,7 +216,7 @@ function App() {
           >
             <p className='font-hs-font'>Filter File</p>
           </button>
-          <button className='bg-hs-orange p-4 rounded-md text-hs-background hover:bg-hs-orange-light'>
+          <button className='bg-hs-orange p-4 rounded-md text-hs-background hover:bg-hs-orange-light' onClick={importFile}>
             <p className='font-hs-font'>Import File to TWS Hubspot</p>
           </button>
         </div>
