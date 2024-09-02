@@ -1,14 +1,19 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-// const BASE_URL ="https://23df-49-145-105-208.ngrok-free.app";
 const BASE_URL ="http://localhost:8080";
 
-
-async function importToHubspot (fileName, contactBlob, companyBlob) {
+async function importToHubspot (fileName, contactBlob, companyBlob, toggleModal) {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const baseFileName = fileName.replace('.csv', '');
+  const formattedFileName = `${baseFileName}_${timestamp}`;  
 
   let importRequest = {
-    "name": 'Construct Connect Outreach Leads V1',
+    "name": formattedFileName,
+    "importOperations": {
+      "0-1": "UPSERT",
+      "0-2": "UPSERT"
+    },
     "files": [
     {
       "fileName": `Construct Connect Contacts.csv`,
@@ -19,88 +24,82 @@ async function importToHubspot (fileName, contactBlob, companyBlob) {
           {
             "columnObjectTypeId": "0-1",
             "columnName": "Name",
-            "propertyName": "First Name"
+            "propertyName": "firstname"
           },
           {
             "columnObjectTypeId": "0-1",
             "columnName": "Project Title",
-            "propertyName": "Project"
+            "propertyName": "project"
           },
           {
             "columnObjectTypeId": "0-1",
             "columnName": "Role",
-            "propertyName": "Job Title"
+            "propertyName": "jobtitle"
           },
           {
             "columnObjectTypeId": "0-1",
-            "columnName": "Phone",
-            "propertyName": "Phone Number"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "Website",
-            "propertyName": "Website URL"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "Project Description",
-            "propertyName": "Membership Notes"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "Building Uses",
-            "propertyName": "Building Uses"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "Project Types",
-            "propertyName": "Project Types"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "Project Category",
-            "propertyName": "Project Industry"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "Address",
-            "propertyName": "Street Address"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "City",
-            "propertyName": "City"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "State",
-            "propertyName": "State/Region"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "ZIP",
-            "propertyName": "Postal Code"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "Email",
-            "propertyName": "Email",
-            "columnType": "HUBSPOT_ALTERNATE_ID"
-          },
-          {
-            "columnObjectTypeId": "0-1",
-            "columnName": "Company ID",
-            "propertyName": "Company Name"
-          },
-          {
             "columnName": "Company",
-            "columnObjectTypeId": "0-1",
             "toColumnObjectTypeId": "0-2",
             "propertyName": null,
             "foreignKeyType": {
               "associationTypeId" : 279,
               "associationCategory": "HUBSPOT_DEFINED"
             }
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Phone",
+            "propertyName": "phone"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Email",
+            "propertyName": "email",
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Website",
+            "propertyName": "website"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Project Description",
+            "propertyName": "hs_content_membership_notes"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Building Uses",
+            "propertyName": "building_uses"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Project Types",
+            "propertyName": "project_types"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Project Category",
+            "propertyName": "primary_industry"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "Address",
+            "propertyName": "address"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "City",
+            "propertyName": "city"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "State",
+            "propertyName": "state"
+          },
+          {
+            "columnObjectTypeId": "0-1",
+            "columnName": "ZIP",
+            "propertyName": "zip"
           },
         ]
       }
@@ -114,18 +113,18 @@ async function importToHubspot (fileName, contactBlob, companyBlob) {
           {
             "columnObjectTypeId": "0-2",
             "columnName": "Company",
-            "propertyName": "Company",
+            "propertyName": "name",
             "associationIdentifierColumn": true,
           },
           {
             "columnObjectTypeId": "0-2",
-            "columnName": "Company ID",
-            "propertyName": "First Name"
+            "columnName": "Website",
+            "propertyName": "company_website"
           },
           {
             "columnObjectTypeId": "0-2",
-            "columnName": "Company ID",
-            "propertyName": "First Name"
+            "columnName": "Domain",
+            "propertyName": "domain"
           },
         ]
       }
@@ -139,16 +138,20 @@ async function importToHubspot (fileName, contactBlob, companyBlob) {
   form.append('importRequest', JSON.stringify(importRequest));
 
   try {
-    const res = await axios.post(`${BASE_URL}/api/import`, form, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    console.log("Successfully Connected to Server", res.status);
+    // const res = await axios.post(`${BASE_URL}/api/import`, form, {
+    //   headers: {
+    //     'Content-Type': 'multipart/form-data',
+    //   },
+    // });
+    
+    // console.log("Server Data", res.data);
+    // console.log("Successfully Connected to Server", res.status);
+    
+    toggleModal();
+
   } catch (error) {
     console.log("Error Importing to Hubspot", error.response ? error.response.data : error.message);
   } 
-
 
 }
 

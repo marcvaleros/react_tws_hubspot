@@ -3,13 +3,20 @@ import React, { useState} from 'react';
 import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
 import importToHubspot from './utilities/hubspot_import';
+import Modal from './components/modal';
 
 function App() {
-  const [fileData, setFileData] = useState([]);
+  const [fileData, setFileData] = useState(null);
   const [fileInfo, setFileInfo] = useState({ name: '', type: '' });
   const [filteredData, setFilteredData] = useState([]);
   const [companyData, setCompanyData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
+
+
+  const toggleModal  = () => {
+    setModalOpen(prev => !prev);
+  }
 
   const handleFileChange = (event) => {
     event.preventDefault();
@@ -73,14 +80,29 @@ function App() {
     const uniqueCompanies = {};
     const companyArray = [];
 
-    // add logic here to create the company data
     filtered.forEach((data) => {
-      if(!uniqueCompanies[data.Company]){
-        uniqueCompanies[data.Company] = true;
-        let domain = getDomainName(data.Email, data.Website);
-        companyArray.push({"Company ID": data["Company ID"],Company: data.Company, Website: data.Website, Domain: domain});
+      const domain = getDomainName(data.Email, data.Website);
+      const companyName = data.Company;
+      const website = data.Website;
+
+      if(!uniqueCompanies[companyName]){
+        uniqueCompanies[companyName] = {
+          Company: companyName,
+          Website: website,
+          Domain: domain,
+        }
+      }else if (domain || website){
+        uniqueCompanies[companyName] = {
+          Company: companyName,
+          Website: website,
+          Domain: domain,
+        };
       }
     });
+    
+    for(const key in uniqueCompanies){
+      companyArray.push(uniqueCompanies[key]);
+    }
 
     setCompanyData(companyArray);
   }
@@ -92,7 +114,7 @@ function App() {
       const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
       const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
 
-      const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob);
+      const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob, toggleModal);
       console.log(res);
       
     } catch (error) {
@@ -125,6 +147,7 @@ function App() {
     const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;'});
     saveAs(blob, `FINAL_${fileInfo.name}`);
   }
+
   const downloadCompanyCSV = () => {
     const csvData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
     const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;'});
@@ -135,7 +158,7 @@ function App() {
 
   const desiredColumns = ["Name", "Project Title", "Role", "Company", "Phone", "Email", "Website","Project Description", "Building Uses", "Project Types", "Project Category","Address", "City", "State", "ZIP"];
 
-  const desiredCompanyColumn = ["Company ID","Company", "Website", "Domain"];  
+  const desiredCompanyColumn = ["Company", "Website", "Domain"];  
 
   const zip_codes = [
     "90002", "90027", "90028", "90038", "90046", "90048", "90049", "90059", "90061",
@@ -201,25 +224,29 @@ function App() {
           </label>
       </div>
    
-        {isFiltered && (
-          <div className='flex flex-row gap-2'>
-            <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Associated Company CSV</button>
-            <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Final Contacts CSV</button>
-          </div>
-        )}
+            <div className='flex flex-row justify-between items-center gap-2 m-4'>
+          
+              <button 
+                className={`bg-hs-dark-gray p-4 rounded-md text-hs-background hover:bg-hs-light-gray ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={filterCSV}
+                disabled={isFiltered || !fileData}
+                >
+                  <p className='font-hs-font'>Filter File</p>
+              </button>
+              <button 
+                className={`bg-hs-orange p-4 rounded-md text-hs-background hover:bg-hs-orange-light ${!isFiltered ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                onClick={importFile} 
+                disabled={!isFiltered}>
+                <p className='font-hs-font'>Import File to TWS Hubspot</p>
+              </button>
+            </div>
 
-        <div className='flex flex-row justify-between items-center gap-2 m-4'>
-          <button 
-            className={`bg-hs-dark-gray p-4 rounded-md text-hs-background hover:bg-hs-light-gray ${isFiltered ? 'opacity-50 cursor-not-allowed' : ''}`}
-            onClick={filterCSV}
-            disabled={isFiltered}
-          >
-            <p className='font-hs-font'>Filter File</p>
-          </button>
-          <button className='bg-hs-orange p-4 rounded-md text-hs-background hover:bg-hs-orange-light' onClick={importFile}>
-            <p className='font-hs-font'>Import File to TWS Hubspot</p>
-          </button>
-        </div>
+            {isFiltered && (
+              <div className='flex flex-row gap-2'>
+                <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Associated Company CSV</button>
+                <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Final Contacts CSV</button>
+              </div>
+            )}
       </div>
       
         <div className="overflow-x-auto p-4 max-h-[500px]">
@@ -250,6 +277,13 @@ function App() {
             </tbody>
           </table>
       </div>
+
+        {isModalOpen && (
+          <Modal toggleModal={toggleModal} >
+          </Modal>
+        ) 
+      
+      }
     </div>
   );
 }
