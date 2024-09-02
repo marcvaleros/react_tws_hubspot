@@ -138,18 +138,23 @@ async function importToHubspot (fileName, contactBlob, companyBlob, toggleModal)
   form.append('importRequest', JSON.stringify(importRequest));
 
   try {
-    // const res = await axios.post(`${BASE_URL}/api/import`, form, {
-    //   headers: {
-    //     'Content-Type': 'multipart/form-data',
-    //   },
-    // });
+    const res = await axios.post(`${BASE_URL}/api/import`, form, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     
-    // console.log("Server Data", res.data);
-    // console.log("Successfully Connected to Server", res.status);
+    console.log("Server Data", res.data);
+    console.log("Successfully Connected to Server", res.status);
     
-    toggleModal();
+    if(res.status === 200){
+      toggleModal("Success");
+    }else{
+      toggleModal("Failed");
+    }
 
   } catch (error) {
+    toggleModal("Failed");
     console.log("Error Importing to Hubspot", error.response ? error.response.data : error.message);
   } 
 

@@ -12,10 +12,12 @@ function App() {
   const [companyData, setCompanyData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
 
-  const toggleModal  = () => {
+  const toggleModal  = (message) => {
     setModalOpen(prev => !prev);
+    setModalMessage(message);
   }
 
   const handleFileChange = (event) => {
@@ -279,7 +281,7 @@ function App() {
       </div>
 
         {isModalOpen && (
-          <Modal toggleModal={toggleModal} >
+          <Modal toggleModal={toggleModal} message={modalMessage}>
           </Modal>
         ) 
       
