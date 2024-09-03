@@ -113,6 +113,10 @@ function App() {
     try {
       const csvContactData = Papa.unparse(filteredData,{ columns: desiredColumns });
       const csvCompanyData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
+
+      console.log(`Contacts data: ${filteredData}`);
+      console.log(`Company data: ${companyData}`);
+      
       const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
       const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
 
