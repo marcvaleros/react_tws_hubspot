@@ -112,8 +112,8 @@ function App() {
 
   const importFile = async () => {
     try {
-      const csvContactData = Papa.unparse(filteredData,{ columns: desiredColumns });
-      const csvCompanyData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
+      // const csvContactData = Papa.unparse(filteredData,{ columns: desiredColumns });
+      // const csvCompanyData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
 
       // console.log(`Contacts data: ${filteredData}`);
       // console.log(`Company data: ${companyData}`);
