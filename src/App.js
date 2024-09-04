@@ -39,7 +39,7 @@ function App() {
       header: true,
       complete: (results) => {
         setFileData(results.data);
-        console.log("Parsed CSV data:", results.data);
+        // console.log("Parsed CSV data:", results.data);
       },
     });
   }
@@ -86,6 +86,7 @@ function App() {
       const domain = getDomainName(data.Email, data.Website);
       const companyName = data.Company;
       const website = data.Website;
+      const email = data.Email;
 
       if(!uniqueCompanies[companyName]){
         uniqueCompanies[companyName] = {
@@ -93,7 +94,7 @@ function App() {
           Website: website,
           Domain: domain,
         }
-      }else if (domain || website){
+      }else if (email || website){
         uniqueCompanies[companyName] = {
           Company: companyName,
           Website: website,
@@ -114,14 +115,17 @@ function App() {
       const csvContactData = Papa.unparse(filteredData,{ columns: desiredColumns });
       const csvCompanyData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
 
-      console.log(`Contacts data: ${filteredData}`);
-      console.log(`Company data: ${companyData}`);
+      // console.log(`Contacts data: ${filteredData}`);
+      // console.log(`Company data: ${companyData}`);
       
       const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
       const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
 
-      const res = await uploadContactWithDeals(csvContactData, csvCompanyData); 
       // const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob, toggleModal); 
+      
+      // console.log(`filtered data: ${filteredData}`);
+      
+      const res = await uploadContactWithDeals(filteredData, companyData); 
       console.log(res);
       
     } catch (error) {
