@@ -11,8 +11,8 @@ async function importToHubspot (fileName, contactBlob, companyBlob, toggleModal)
   let importRequest = {
     "name": formattedFileName,
     "importOperations": {
-      "0-1": "UPSERT",
-      "0-2": "UPSERT"
+      "0-1": "CREATE",
+      "0-2": "CREATE"
     },
     "files": [
     {
