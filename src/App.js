@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState} from 'react';
 import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
-import importToHubspot from './utilities/hubspot_import';
+import {importToHubspot, uploadContactWithDeals} from './utilities/hubspot_import';
 import Modal from './components/modal';
 
 function App() {
@@ -120,7 +120,8 @@ function App() {
       const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
       const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
 
-      const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob, toggleModal);
+      const res = await uploadContactWithDeals(csvContactData, csvCompanyData); 
+      // const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob, toggleModal); 
       console.log(res);
       
     } catch (error) {

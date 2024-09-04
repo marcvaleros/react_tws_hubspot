@@ -1,9 +1,27 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-const BASE_URL ="https://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com";
+// const BASE_URL ="https://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com";
+const BASE_URL ="https://api.hubapi.com";
 
-async function importToHubspot (fileName, contactBlob, companyBlob, toggleModal) {
+
+//create a function that loops through the csv file and create the contact, associate them with a company or a deal
+
+export async function uploadContactWithDeals(contactCSV, companyCSV){
+
+  try {
+    
+    console.log(contactCSV);
+    
+    //search for associated companies if it exist and get id
+    //search for associated deals if it already exist and get the id 
+    return "Success"
+  } catch (error) {
+    console.log(`Upload contacts failed. Error: ${error}`);
+  }
+}
+
+export async function importToHubspot (fileName, contactBlob, companyBlob, toggleModal) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const baseFileName = fileName.replace('.csv', '');
   const formattedFileName = `${baseFileName}_${timestamp}`;  
@@ -12,7 +30,7 @@ async function importToHubspot (fileName, contactBlob, companyBlob, toggleModal)
     "name": formattedFileName,
     "importOperations": {
       "0-1": "UPSERT",
-      "0-2": "UPSERT"
+      "0-2": "UPSERT",
     },
     "files": [
     {
@@ -159,5 +177,3 @@ async function importToHubspot (fileName, contactBlob, companyBlob, toggleModal)
   } 
 
 }
-
-export default importToHubspot 
