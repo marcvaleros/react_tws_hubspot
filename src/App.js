@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState} from 'react';
 import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
-import {importToHubspot, uploadContactWithDeals} from './utilities/hubspot_import';
+import {importToHubspot, sendToServer} from './utilities/hubspot_import';
 import Modal from './components/modal';
 
 function App() {
@@ -118,16 +118,12 @@ function App() {
       // console.log(`Contacts data: ${filteredData}`);
       // console.log(`Company data: ${companyData}`);
       
-      const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
-      const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
-
+      // const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
+      // const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
       // const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob, toggleModal); 
       
       // console.log(`filtered data: ${filteredData}`);
-      
-      const res = await uploadContactWithDeals(filteredData, companyData); 
-      console.log(res);
-      
+      await sendToServer(filteredData, companyData); 
     } catch (error) {
       console.log("Error Detected", error);
       

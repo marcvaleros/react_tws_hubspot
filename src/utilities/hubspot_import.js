@@ -2,97 +2,29 @@ import axios from 'axios';
 import FormData from 'form-data';
 
 // const BASE_URL ="https://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com";
-const BASE_URL ="https://api.hubapi.com";
+const BASE_URL ="http://localhost:8080";
 
-//returns the id of the existing or newly created contact 
-async function createContactRecord(email, phone){
+export async function sendToServer(contactData, companyData) {
   try {
-    let requestBody = {};
-    if(email){
-      requestBody = {
-        "filters": [
-          {
-            "propertyName": "email",
-            "operator": "CONTAINS_TOKEN",
-            "value": `*${email}`
-          }
-        ],
-        "sorts": [{
-            "propertyName": "createdate",
-            "direction": "DESCENDING"
-          }],
-        "properties": [
-          "id",
-          "phone",
-          "email",
-          "firstname",
-          "lastname",
-          "createdate",
-          "hs_lead_status",
-        ],
-        "limit": 1,
-      };
-    }else if(phone){
-      requestBody = {
-        "filters": [
-          {
-            "propertyName": "phone",
-            "operator": "CONTAINS_TOKEN",
-            "value": `*${phone}`
-          }
-        ],
-        "sorts": [{
-            "propertyName": "createdate",
-            "direction": "DESCENDING"
-          }],
-        "properties": [
-          "id",
-          "phone",
-          "email",
-          "firstname",
-          "lastname",
-          "createdate",
-          "hs_lead_status",
-        ],
-        "limit": 1,
-      };
-    }
+    const payload = {
+      contact: contactData,
+      company: companyData
+    };
 
-    const response = await axios.post(`${BASE_URL}/crm/v3/objects/contacts/search`, requestBody, {
+    const res = await axios.post(`${BASE_URL}/upload/contacts`, payload, {
       headers: {
-        'Authorization': `Bearer ${process.env.HUBSPOT_API_KEY}`,
         'Content-Type': 'application/json',
       }
     });
 
-    console.log(response.results[0].id);
-    console.log(response.status);
-    return response.results[0].id;
-    //if not existed 
+    if (res.status === 200) {
+      console.log("Successfully sent data to backend server");
+    }
   } catch (error) {
-      console.log(`Failed to fetch contact information. Contact probably does not exist yet. Error: ${error}`);
-  }
-
-}
-
-
-//create a function that loops through the csv file and create the contact, associate them with a company or a deal
-
-export async function uploadContactWithDeals(contactData, companyData){
-  try {
-    // console.log(Object.values(contactData).forEach((contact) => console.log(contact.Name)));
-
-    Object.values(contactData).forEach(async (contact)=> {
-      const contactID = await createContactRecord(contact.Email, contact.Phone); 
-      console.log(contactID);
-    })
-
-    //search for associated companies if it exist and get id
-    //search for associated deals if it already exist and get the id 
-  } catch (error) {
-    console.log(`Upload contacts failed. Error: ${error}`);
+    console.log(`Error sending contact and company data to backend server. Error: ${error}`);
   }
 }
+
 
 export async function importToHubspot (fileName, contactBlob, companyBlob, toggleModal) {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
