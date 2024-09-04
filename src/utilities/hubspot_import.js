@@ -12,7 +12,7 @@ async function importToHubspot (fileName, contactBlob, companyBlob, toggleModal)
     "name": formattedFileName,
     "importOperations": {
       "0-1": "CREATE",
-      "0-2": "CREATE"
+      "0-2": "UPSERT"
     },
     "files": [
     {
