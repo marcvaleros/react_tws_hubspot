@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState} from 'react';
 import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
-import {importToHubspot, sendToServer} from './utilities/hubspot_import';
+import { sendToServer} from './utilities/hubspot_import';
 import Modal from './components/modal';
 
 function App() {
@@ -163,7 +163,7 @@ function App() {
 
 
 
-  const desiredColumns = ["Name", "Project Title", "Role", "Company", "Phone", "Email", "Website","Project Description", "Building Uses", "Project Types", "Project Category","Address", "City", "State", "ZIP"];
+  const desiredColumns = ["Project ID","Name", "Project Title", "Role", "Company", "Phone", "Email", "Website","Project Description", "Building Uses", "Project Types", "Project Category","Address", "City", "State", "ZIP"];
 
   const desiredCompanyColumn = ["Company", "Website", "Domain"];  
 
