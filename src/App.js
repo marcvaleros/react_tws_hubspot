@@ -10,6 +10,7 @@ function App() {
   const [fileInfo, setFileInfo] = useState({ name: '', type: '' });
   const [filteredData, setFilteredData] = useState([]);
   const [companyData, setCompanyData] = useState([]);
+  const [projectsData, setProjectsData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
@@ -82,6 +83,31 @@ function App() {
     const uniqueCompanies = {};
     const companyArray = [];
 
+    const uniqueProjects = {};
+    const projectsArray = [];
+
+    filtered.forEach((contact) => {
+      const dealName = `${contact["Project Title"]}_${contact["Project ID"]}`;
+      const descriptions =  `Project Title: ${contact["Project Title"]}\nProject Types: ${contact["Project Types"]}\nBuilding Uses: ${contact["Building Uses"]}\nProject Category: ${contact["Project Category"]}\nProject Description: ${contact["Project Description"]}\n
+      `;
+
+      if(!uniqueProjects[dealName]){
+        uniqueProjects[dealName] = {
+          'Dealname': dealName,
+          'Pipeline': "default",
+          'Dealstage': "239936678",
+          "Description": descriptions
+        }
+      }
+
+    });
+
+    for(const key in uniqueProjects){
+      projectsArray.push(uniqueProjects[key]);
+    }
+
+    setProjectsData(projectsArray);
+
     filtered.forEach((data) => {
       const domain = getDomainName(data.Email, data.Website);
       const companyName = data.Company;
@@ -115,11 +141,13 @@ function App() {
       const csvContactData = Papa.unparse(filteredData,{ columns: desiredColumns });
       const csvCompanyData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
       const csvContactDataV2 = Papa.unparse(filteredData,{ columns: desiredForImport });
+      const csvProjectData = Papa.unparse(projectsData,{ columns: desiredProjectColumns });
 
       const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
       const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
       const contactBlob2 = new Blob([csvContactDataV2], { type: 'text/csv;charset=utf-8;'});
-      await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, toggleModal); 
+      const projectBlob = new Blob([csvProjectData], { type: 'text/csv;charset=utf-8;'});
+      await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal); 
       // const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob, toggleModal); 
     } catch (error) {
       console.log("Error Detected", error);
@@ -158,8 +186,17 @@ function App() {
     saveAs(blob, `COMPANY_${fileInfo.name}`);
   }
 
+  const downloadProjectCSV = () => {
+    const csvData = Papa.unparse(projectsData,{ columns: desiredProjectColumns });
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;'});
+    saveAs(blob, `PROJECT_${fileInfo.name}`);
+  }
 
-
+  // 'Dealname': dealName,
+  // 'Pipeline': "default",
+  // 'Dealstage': "239936678",
+  // "Description": descriptions
+  const desiredProjectColumns = ["Dealname",  "Description", "Pipeline", "Dealstage"];
   const desiredForImport = ["Name", "Role", "Phone", "Email", "Website", "Address", "City", "State", "ZIP"]; 
 
   const desiredColumns = ["Project ID", "Name", "Project Title", "Role", "Company", "Phone", "Email", "Website","Project Description", "Building Uses", "Project Types", "Project Category","Address", "City", "State", "ZIP"];
@@ -249,8 +286,9 @@ function App() {
 
             {isFiltered && (
               <div className='flex flex-row gap-2'>
-                <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Associated Company CSV</button>
-                <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Final Contacts CSV</button>
+                <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Companies CSV</button>
+                <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts CSV</button>
+                <button onClick={downloadProjectCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Projects CSV</button>
               </div>
             )}
       </div>
