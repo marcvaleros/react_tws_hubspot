@@ -112,18 +112,15 @@ function App() {
 
   const importFile = async () => {
     try {
-      // const csvContactData = Papa.unparse(filteredData,{ columns: desiredColumns });
-      // const csvCompanyData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
+      const csvContactData = Papa.unparse(filteredData,{ columns: desiredColumns });
+      const csvCompanyData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
+      const csvContactDataV2 = Papa.unparse(filteredData,{ columns: desiredForImport });
 
-      // console.log(`Contacts data: ${filteredData}`);
-      // console.log(`Company data: ${companyData}`);
-      
-      // const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
-      // const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
+      const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
+      const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
+      const contactBlob2 = new Blob([csvContactDataV2], { type: 'text/csv;charset=utf-8;'});
+      await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, toggleModal); 
       // const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob, toggleModal); 
-      
-      // console.log(`filtered data: ${filteredData}`);
-      await sendToServer(filteredData, companyData); 
     } catch (error) {
       console.log("Error Detected", error);
       
@@ -163,7 +160,9 @@ function App() {
 
 
 
-  const desiredColumns = ["Project ID","Name", "Project Title", "Role", "Company", "Phone", "Email", "Website","Project Description", "Building Uses", "Project Types", "Project Category","Address", "City", "State", "ZIP"];
+  const desiredForImport = ["Name", "Role", "Phone", "Email", "Website", "Address", "City", "State", "ZIP"]; 
+
+  const desiredColumns = ["Project ID", "Name", "Project Title", "Role", "Company", "Phone", "Email", "Website","Project Description", "Building Uses", "Project Types", "Project Category","Address", "City", "State", "ZIP"];
 
   const desiredCompanyColumn = ["Company", "Website", "Domain"];  
 
