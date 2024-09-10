@@ -61,7 +61,6 @@ function App() {
     }
   }
 
-
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -192,10 +191,6 @@ function App() {
     saveAs(blob, `PROJECT_${fileInfo.name}`);
   }
 
-  // 'Dealname': dealName,
-  // 'Pipeline': "default",
-  // 'Dealstage': "239936678",
-  // "Description": descriptions
   const desiredProjectColumns = ["Dealname",  "Description", "Pipeline", "Dealstage"];
   const desiredForImport = ["Name", "Role", "Phone", "Email", "Website", "Address", "City", "State", "ZIP"]; 
 
