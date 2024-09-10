@@ -1,9 +1,10 @@
 import './App.css';
-import React, { useState} from 'react';
+import React, { useState, useEffect} from 'react';
 import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
 import { sendToServer} from './utilities/hubspot_import';
 import Modal from './components/modal';
+import LoadingSpinner from './components/loadingSpinner';
 
 function App() {
   const [fileData, setFileData] = useState(null);
@@ -14,7 +15,20 @@ function App() {
   const [isFiltered, setIsFiltered] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (loading) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [loading]);
 
   const toggleModal  = (message) => {
     setModalOpen(prev => !prev);
@@ -75,7 +89,12 @@ function App() {
   };
 
   const filterCSV = () => {
-    const filtered = fileData.filter(raw => zip_codes.includes(raw.ZIP));
+    const filtered = fileData.filter(raw => {
+    const formattedPhone = raw.Phone ? raw.Phone.replace(/[-() ]/g, ''):'';
+
+    raw.Phone = formattedPhone;
+    return zip_codes.includes(raw.ZIP)
+  });
     setFilteredData(filtered);
     setIsFiltered(true);
 
@@ -146,7 +165,7 @@ function App() {
       const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
       const contactBlob2 = new Blob([csvContactDataV2], { type: 'text/csv;charset=utf-8;'});
       const projectBlob = new Blob([csvProjectData], { type: 'text/csv;charset=utf-8;'});
-      await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal); 
+      await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading); 
       // const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob, toggleModal); 
     } catch (error) {
       console.log("Error Detected", error);
@@ -236,94 +255,109 @@ function App() {
   ];
 
   return (
-    <div>
-      <div className="h-screen flex flex-col items-center justify-center bg-hs-background ">
-        <h1 className='text-lg text-hs-orange uppercase'>
-          Please upload a raw file to convert to final file (ONLY ACCEPTS CSV FILE FORMAT)
-        </h1>
-        <div className="container m-6 px-[100px]" onDrop={handleDrop} onDragOver={handleDragOver}>
-          <label
-              className="flex justify-center w-full h-[300px] transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none hover:bg-hs-gray">
-              <div className="flex items-center space-x-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round"
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  <div className="font-medium text-gray-600">
-                      Drop files to upload, or
-                      <span className="text-blue-600 underline"> browse</span>
-                    <p className='text-hs-dark-gray'>{fileInfo.name || 'No file selected'}</p>
-                  </div>
-                  <div>
-                  </div>
+    <>
+      { loading && (
+        <div className="fixed inset-0 bg-orange-500 bg-opacity-90 flex justify-center items-center z-50">
+          <div className="flex flex-col gap-2 text-center justify-center items-center">
+              <LoadingSpinner />
+            <div className="text-white text-xl">Importing New Records To Hubspot..</div>
+          </div>
+        </div>
+      )}
+      <div>
+        <div className="h-screen flex flex-col items-center justify-center bg-hs-background ">
+          <h1 className='text-lg text-hs-orange uppercase'>
+            Please upload a raw file to convert to final file (ONLY ACCEPTS CSV FILE FORMAT)
+          </h1>
+          <div className="container m-6 px-[100px]" onDrop={handleDrop} onDragOver={handleDragOver}>
+            <label
+                className="flex justify-center w-full h-[300px] transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none hover:bg-hs-gray">
+                <div className="flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <div className="font-medium text-gray-600">
+                        Drop files to upload, or
+                        <span className="text-blue-600 underline"> browse</span>
+                      <p className='text-hs-dark-gray'>{fileInfo.name || 'No file selected'}</p>
+                    </div>
+                    <div>
+                    </div>
+                </div>
+                <input type="file" name="file_upload" accept=".csv" className="hidden" onChange={handleFileChange} />
+            </label>
+        </div>
+    
+              <div className='flex flex-row justify-between items-center gap-2 m-4'>
+            
+                <button 
+                  className={`bg-hs-dark-gray p-4 rounded-md text-hs-background hover:bg-hs-light-gray ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={filterCSV}
+                  disabled={isFiltered || !fileData}
+                  >
+                    <p className='font-hs-font'>Filter File</p>
+                </button>
+                <button 
+                  className={`bg-hs-orange p-4 rounded-md text-hs-background hover:bg-hs-orange-light ${!isFiltered ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                  onClick={importFile} 
+                  disabled={!isFiltered}>
+                  <p className='font-hs-font'>Import File to TWS Hubspot</p>
+                </button>
               </div>
-              <input type="file" name="file_upload" accept=".csv" className="hidden" onChange={handleFileChange} />
-          </label>
-      </div>
-   
-            <div className='flex flex-row justify-between items-center gap-2 m-4'>
-          
-              <button 
-                className={`bg-hs-dark-gray p-4 rounded-md text-hs-background hover:bg-hs-light-gray ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={filterCSV}
-                disabled={isFiltered || !fileData}
-                >
-                  <p className='font-hs-font'>Filter File</p>
-              </button>
-              <button 
-                className={`bg-hs-orange p-4 rounded-md text-hs-background hover:bg-hs-orange-light ${!isFiltered ? 'opacity-50 cursor-not-allowed' : ''}`} 
-                onClick={importFile} 
-                disabled={!isFiltered}>
-                <p className='font-hs-font'>Import File to TWS Hubspot</p>
-              </button>
-            </div>
 
-            {isFiltered && (
-              <div className='flex flex-row gap-2'>
-                <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Companies CSV</button>
-                <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts CSV</button>
-                <button onClick={downloadProjectCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Projects CSV</button>
-              </div>
-            )}
-      </div>
-      
-        <div className="overflow-x-auto p-4 max-h-[500px]">
-          <table className="min-w-full border border-gray-300 divide-y divide-gray-200 text-[10px]">
-            <thead className="bg-gray-100">
-              <tr>
+              {isFiltered && (
+                <div className='flex flex-row gap-2'>
+                  <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Companies CSV</button>
+                  <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts CSV</button>
+                  <button onClick={downloadProjectCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Projects CSV</button>
+                </div>
+              )}
+        </div>
+        
+        {filteredData.length > 0 && (
+            <div className="overflow-x-auto p-4 max-h-[500px]">
+            <table className="min-w-full border border-gray-300 divide-y divide-gray-200 text-[10px]">
+              <thead className="bg-gray-100">
+                <tr>
+                  {desiredColumns.map((column) => (
+                    <th key={column} className=" py-1 border-b text-left whitespace-nowrap">
+                      {column}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+            {filteredData.map((row, index) => (
+              <tr key={index} className="hover:bg-gray-50">
                 {desiredColumns.map((column) => (
-                  <th key={column} className=" py-1 border-b text-left whitespace-nowrap">
-                    {column}
-                  </th>
+                  <td
+                    key={column}
+                    className="px-2 py-1 border-b max-w-[100px] overflow-hidden text-ellipsis whitespace-normal break-words"
+                    title={row[column] || ''}
+                  >
+                    {truncateText(row[column] || '', 10)}
+                  </td>
                 ))}
               </tr>
-            </thead>
-            <tbody>
-          {filteredData.map((row, index) => (
-            <tr key={index} className="hover:bg-gray-50">
-              {desiredColumns.map((column) => (
-                <td
-                  key={column}
-                  className="px-2 py-1 border-b max-w-[100px] overflow-hidden text-ellipsis whitespace-normal break-words"
-                  title={row[column] || ''}
-                >
-                  {truncateText(row[column] || '', 10)}
-                </td>
-              ))}
-            </tr>
-          ))}
-            </tbody>
-          </table>
-      </div>
+            ))}
+              </tbody>
+            </table>
+        </div>
+          )
+        }
 
-        {isModalOpen && (
-          <Modal toggleModal={toggleModal} message={modalMessage}>
-          </Modal>
-        ) 
-      
-      }
-    </div>
+
+          {isModalOpen && (
+            <Modal toggleModal={toggleModal} message={modalMessage}>
+            </Modal>
+          ) 
+        
+        }
+      </div>
+    
+    </>
   );
 }
 
