@@ -1,8 +1,8 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-// const BASE_URL ="https://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com";
-const BASE_URL ="http://localhost:8080";
+const BASE_URL ="https://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com";
+// const BASE_URL ="http://localhost:8080";
 
 
 export async function sendToServer(fileName, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading) {
