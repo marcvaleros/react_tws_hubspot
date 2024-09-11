@@ -23,6 +23,7 @@ export async function sendToServer(fileName, contactBlob, companyBlob, contactBl
 
     if(res.status === 200){
       console.log(res.data);
+      console.log(res.message);
       toggleModal("Success");
     }else{
       toggleModal("Failed");

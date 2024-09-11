@@ -15,8 +15,8 @@ function App() {
   const [isFiltered, setIsFiltered] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  // const [loading, setLoading] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (loading) {
