@@ -10,6 +10,7 @@ function App() {
   const [fileData, setFileData] = useState(null);
   const [fileInfo, setFileInfo] = useState({ name: '', type: '' });
   const [filteredData, setFilteredData] = useState([]);
+  const [invalidData, setInvalidData] = useState([]);
   const [companyData, setCompanyData] = useState([]);
   const [projectsData, setProjectsData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
@@ -89,13 +90,38 @@ function App() {
   };
 
   const filterCSV = () => {
+    const processed = new Set();
+    const validContacts = [];
+    const invalidContacts = [];
+    const duplicateEmailContacts = [];
     const filtered = fileData.filter(raw => {
     const formattedPhone = raw.Phone ? raw.Phone.replace(/[-() ]/g, ''):'';
 
     raw.Phone = formattedPhone;
     return zip_codes.includes(raw.ZIP)
   });
-    setFilteredData(filtered);
+
+    filtered.forEach(contact => {
+      const email = contact.Email;
+      const project = `${contact["Project Title"]}_${contact["Project ID"]}`;
+
+      const uniqueKey = `${email}_${project}`;
+
+      if(!email){
+        invalidContacts.push(contact);        //stored in the invalidContacts state
+      }else if(processed.has(uniqueKey)) {
+        duplicateEmailContacts.push(contact); //important to get the total number of duplicated emails in one project
+      }else{
+        validContacts.push(contact);          //stored in the filteredData state
+        processed.add(uniqueKey);
+      }
+    })
+    console.log(`The number of contacts with duplicate emails is: ${duplicateEmailContacts.length}`);
+    console.log(`The number of contacts with valid emails is: ${validContacts.length}`);
+    console.log(`The number of contacts with invalid emails is: ${invalidContacts.length}`);
+    
+    setFilteredData(validContacts);
+    setInvalidData(invalidContacts);
     setIsFiltered(true);
 
     const uniqueCompanies = {};
@@ -195,7 +221,12 @@ function App() {
   const downloadFilteredCSV = () => {
     const csvData = Papa.unparse(filteredData,{ columns: desiredColumns });
     const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;'});
-    saveAs(blob, `FINAL_${fileInfo.name}`);
+    saveAs(blob, `VALID_EMAILS_${fileInfo.name}`);
+  }
+  const downloadInvalidContactsCSV = () => {
+    const csvData = Papa.unparse(invalidData,{ columns: desiredColumns });
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;'});
+    saveAs(blob, `INVALID_EMAILS_${fileInfo.name}`);
   }
 
   const downloadCompanyCSV = () => {
@@ -310,7 +341,8 @@ function App() {
               {isFiltered && (
                 <div className='flex flex-row gap-2'>
                   <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Companies CSV</button>
-                  <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts CSV</button>
+                  <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts with Emails CSV</button>
+                  <button onClick={downloadInvalidContactsCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts with No Emails CSV</button>
                   <button onClick={downloadProjectCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Projects CSV</button>
                 </div>
               )}
