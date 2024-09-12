@@ -5,19 +5,20 @@ import { saveAs } from 'file-saver';
 import { sendToServer} from './utilities/hubspot_import';
 import Modal from './components/modal';
 import LoadingSpinner from './components/loadingSpinner';
+import DisplayContactCounts from './components/contactCount';
 
 function App() {
   const [fileData, setFileData] = useState(null);
   const [fileInfo, setFileInfo] = useState({ name: '', type: '' });
   const [filteredData, setFilteredData] = useState([]);
   const [invalidData, setInvalidData] = useState([]);
+  const [duplicateData, setDuplicateData] = useState([]);
   const [companyData, setCompanyData] = useState([]);
   const [projectsData, setProjectsData] = useState([]);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (loading) {
@@ -116,12 +117,13 @@ function App() {
         processed.add(uniqueKey);
       }
     })
-    console.log(`The number of contacts with duplicate emails is: ${duplicateEmailContacts.length}`);
-    console.log(`The number of contacts with valid emails is: ${validContacts.length}`);
-    console.log(`The number of contacts with invalid emails is: ${invalidContacts.length}`);
+    console.log(`Contacts with valid email: ${validContacts.length}`);
+    console.log(`Contacts with invalid email: ${invalidContacts.length}`);
+    console.log(`Contacts with duplicate email: ${duplicateEmailContacts.length}`);
     
     setFilteredData(validContacts);
     setInvalidData(invalidContacts);
+    setDuplicateData(duplicateEmailContacts);
     setIsFiltered(true);
 
     const uniqueCompanies = {};
@@ -339,12 +341,21 @@ function App() {
               </div>
 
               {isFiltered && (
-                <div className='flex flex-row gap-2'>
-                  <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Companies CSV</button>
-                  <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts with Emails CSV</button>
-                  <button onClick={downloadInvalidContactsCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts with No Emails CSV</button>
-                  <button onClick={downloadProjectCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Projects CSV</button>
-                </div>
+                <>
+                  <div className='flex flex-row gap-2'>
+                    <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Companies CSV</button>
+                    <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts with Emails CSV</button>
+                    <button onClick={downloadInvalidContactsCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts with No Emails CSV</button>
+                    <button onClick={downloadProjectCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Projects CSV</button>
+                  </div>
+                  <div>
+                    <DisplayContactCounts
+                      validContacts={filteredData}
+                      invalidContacts={invalidData}
+                      duplicateEmailContacts={duplicateData}
+                    />
+                  </div>
+                </>
               )}
         </div>
         
