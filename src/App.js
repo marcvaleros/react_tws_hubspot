@@ -19,6 +19,8 @@ function App() {
   const [isModalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [displayImportSummary,setDisplayImportSummary] = useState(false);
+  const [gdriveLink, setGdriveLink] = useState(null);
 
   useEffect(() => {
     if (loading) {
@@ -43,8 +45,11 @@ function App() {
     if(file){
       setFileData([]);
       setFileInfo({ name: '', type: '' });
-      setIsFiltered(false); 
+      setIsFiltered(false);
+      setFilteredData([]);
       setCompanyData([]);
+      setDisplayImportSummary(false);
+      setGdriveLink(null);
 
       setFileInfo({ name: file.name, type: file.type });
       parseFile(file);
@@ -70,7 +75,10 @@ function App() {
       setFileData([]);
       setFileInfo({ name: '', type: '' });
       setIsFiltered(false);
+      setFilteredData([]);
       setCompanyData([]);
+      setDisplayImportSummary(false);
+      setGdriveLink(null);
 
       setFileInfo({ name: file.name, type: file.type });
       parseFile(file);
@@ -118,9 +126,9 @@ function App() {
       }
     })
 
-    console.log(`Contacts with valid email: ${validContacts.length}`);
-    console.log(`Contacts with invalid email: ${invalidContacts.length}`);
-    console.log(`Contacts with duplicate email: ${duplicateEmailContacts.length}`);
+    // console.log(`Contacts with valid email: ${validContacts.length}`);
+    // console.log(`Contacts with invalid email: ${invalidContacts.length}`);
+    // console.log(`Contacts with duplicate email: ${duplicateEmailContacts.length}`);
     
     setFilteredData(validContacts);
     setInvalidData(invalidContacts);
@@ -199,9 +207,13 @@ function App() {
     
       if(invalidData.length > 0){
         const invalidContactBlob = createCSVBlob(invalidData, desiredColumns);
-        await uploadInvalidContacts(fileInfo.name, invalidContactBlob);
+        const link = await uploadInvalidContacts(fileInfo.name, invalidContactBlob);
+        console.log(`Gdrive link: ${link}`);
+        setGdriveLink(link);
+        setDisplayImportSummary(true);
       }else{
         console.log("There is nothing to upload to drive because there are no invalid contacts");
+        setDisplayImportSummary(true);
       }
 
     } catch (error) {
@@ -346,52 +358,61 @@ function App() {
               {isFiltered && (
                 <>
                   <div className='flex flex-row gap-2'>
-                    <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Companies CSV</button>
-                    <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts with Emails CSV</button>
-                    <button onClick={downloadProjectCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Projects CSV</button>
+                  <button onClick={downloadCompanyCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
+                    <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Companies CSV
+                  </button>
+                  <button onClick={downloadFilteredCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
+                    <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Contacts with Emails CSV
+                  </button>
+                  <button onClick={downloadProjectCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
+                    <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Projects CSV
+                  </button>
+                  
                   </div>
-                  <div>
-                    <DisplayContactCounts
-                      validContacts={filteredData}
-                      invalidContacts={invalidData}
-                      duplicateEmailContacts={duplicateData}
+                    { displayImportSummary && (
+                      <DisplayContactCounts
+                        link={gdriveLink}
+                        validContacts={filteredData}
+                        invalidContacts={invalidData}
+                        duplicateEmailContacts={duplicateData}
                     />
-                  </div>
+                    )
+                    }
                 </>
               )}
         </div>
         
-        {filteredData.length > 0 && (
-            <div className="overflow-x-auto p-4 max-h-[500px]">
-            <table className="min-w-full border border-gray-300 divide-y divide-gray-200 text-[10px]">
-              <thead className="bg-gray-100">
-                <tr>
+          {filteredData.length > 0 && (
+              <div className="overflow-x-auto p-4 max-h-[500px]">
+              <table className="min-w-full border border-gray-300 divide-y divide-gray-200 text-[10px]">
+                <thead className="bg-gray-100">
+                  <tr>
+                    {desiredColumns.map((column) => (
+                      <th key={column} className=" py-1 border-b text-left whitespace-nowrap">
+                        {column}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+              {filteredData.map((row, index) => (
+                <tr key={index} className="hover:bg-gray-50">
                   {desiredColumns.map((column) => (
-                    <th key={column} className=" py-1 border-b text-left whitespace-nowrap">
-                      {column}
-                    </th>
+                    <td
+                      key={column}
+                      className="px-2 py-1 border-b max-w-[100px] overflow-hidden text-ellipsis whitespace-normal break-words"
+                      title={row[column] || ''}
+                    >
+                      {truncateText(row[column] || '', 10)}
+                    </td>
                   ))}
                 </tr>
-              </thead>
-              <tbody>
-            {filteredData.map((row, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                {desiredColumns.map((column) => (
-                  <td
-                    key={column}
-                    className="px-2 py-1 border-b max-w-[100px] overflow-hidden text-ellipsis whitespace-normal break-words"
-                    title={row[column] || ''}
-                  >
-                    {truncateText(row[column] || '', 10)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-              </tbody>
-            </table>
-        </div>
-          )
-        }
+              ))}
+                </tbody>
+              </table>
+          </div>
+            )
+          }
 
 
           {isModalOpen && (

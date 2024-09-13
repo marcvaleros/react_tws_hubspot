@@ -10,6 +10,7 @@ module.exports = {
       },
       
       colors: {
+        'hs-blue': '#0091AE',
         'hs-background': '#fefefe', 
         'hs-gray': '#dde2e5', 
         'hs-light-gray': '#425B76', 

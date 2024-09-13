@@ -1,8 +1,8 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-// const BASE_URL ="https://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com";
-const BASE_URL ="http://localhost:8080";
+const BASE_URL ="https://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com";
+// const BASE_URL ="http://localhost:8080";
 
 export async function uploadInvalidContacts(filename, invalidContactBlob){
   let form = new FormData();
@@ -17,12 +17,14 @@ export async function uploadInvalidContacts(filename, invalidContactBlob){
     });
 
     if(res.status === 200){
-      console.log(`This is the link for the upload: ${JSON.stringify(res.data,null,1)}`);
+      return res.data.webViewLink;
     }else{
       console.log(`Failed to upload file to gdrive. Status ${res.status}`);
+      return null;
     }
   } catch (error) {
     console.log(`Upload Invalid Contacts to Drive Failed. Error: ${error}`);
+    return null;
   }
 }
 
