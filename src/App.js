@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState, useEffect} from 'react';
 import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
-import { sendToServer} from './utilities/hubspot_import';
+import { sendToServer, uploadInvalidContacts } from './utilities/hubspot_import';
 import Modal from './components/modal';
 import LoadingSpinner from './components/loadingSpinner';
 import DisplayContactCounts from './components/contactCount';
@@ -90,7 +90,7 @@ function App() {
     return text;
   };
 
-  const filterCSV = () => {
+  const filterCSV = async () => {
     const processed = new Set();
     const validContacts = [];
     const invalidContacts = [];
@@ -117,6 +117,7 @@ function App() {
         processed.add(uniqueKey);
       }
     })
+
     console.log(`Contacts with valid email: ${validContacts.length}`);
     console.log(`Contacts with invalid email: ${invalidContacts.length}`);
     console.log(`Contacts with duplicate email: ${duplicateEmailContacts.length}`);
@@ -184,20 +185,27 @@ function App() {
 
   const importFile = async () => {
     try {
-      const csvContactData = Papa.unparse(filteredData,{ columns: desiredColumns });
-      const csvCompanyData = Papa.unparse(companyData,{ columns: desiredCompanyColumn });
-      const csvContactDataV2 = Papa.unparse(filteredData,{ columns: desiredForImport });
-      const csvProjectData = Papa.unparse(projectsData,{ columns: desiredProjectColumns });
+      const createCSVBlob = (data, columns) => {
+        const csvData = Papa.unparse(data, {columns});
+        return new Blob([csvData], {type: 'text/csv;charset=utf-8;' });
+      }
 
-      const contactBlob = new Blob([csvContactData], { type: 'text/csv;charset=utf-8;'});
-      const companyBlob = new Blob([csvCompanyData], { type: 'text/csv;charset=utf-8;'});
-      const contactBlob2 = new Blob([csvContactDataV2], { type: 'text/csv;charset=utf-8;'});
-      const projectBlob = new Blob([csvProjectData], { type: 'text/csv;charset=utf-8;'});
-      await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading); 
-      // const res = await importToHubspot(fileInfo.name, contactBlob, companyBlob, toggleModal); 
+      const contactBlob = createCSVBlob(filteredData, desiredColumns);
+      const companyBlob = createCSVBlob(companyData, desiredCompanyColumn);
+      const contactBlob2 = createCSVBlob(filteredData, desiredForImport);
+      const projectBlob = createCSVBlob(projectsData, desiredProjectColumns);
+
+      await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading);
+    
+      if(invalidData.length > 0){
+        const invalidContactBlob = createCSVBlob(invalidData, desiredColumns);
+        await uploadInvalidContacts(fileInfo.name, invalidContactBlob);
+      }else{
+        console.log("There is nothing to upload to drive because there are no invalid contacts");
+      }
+
     } catch (error) {
-      console.log("Error Detected", error);
-      
+      console.log(`Error processing files: ${error}`);
     }
   }
 
@@ -224,11 +232,6 @@ function App() {
     const csvData = Papa.unparse(filteredData,{ columns: desiredColumns });
     const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;'});
     saveAs(blob, `VALID_EMAILS_${fileInfo.name}`);
-  }
-  const downloadInvalidContactsCSV = () => {
-    const csvData = Papa.unparse(invalidData,{ columns: desiredColumns });
-    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;'});
-    saveAs(blob, `INVALID_EMAILS_${fileInfo.name}`);
   }
 
   const downloadCompanyCSV = () => {
@@ -345,7 +348,6 @@ function App() {
                   <div className='flex flex-row gap-2'>
                     <button onClick={downloadCompanyCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Companies CSV</button>
                     <button onClick={downloadFilteredCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts with Emails CSV</button>
-                    <button onClick={downloadInvalidContactsCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Contacts with No Emails CSV</button>
                     <button onClick={downloadProjectCSV} className='bg-green-100 text-green-900 p-4 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>Download Projects CSV</button>
                   </div>
                   <div>
