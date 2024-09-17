@@ -8,7 +8,6 @@ module.exports = {
       fontFamily: {
         'hs-font': ['Lexend Deca', 'Helvetica', 'Arial', 'sans-serif'],
       },
-      
       colors: {
         'hs-blue': '#0091AE',
         'hs-background': '#fefefe', 
@@ -18,6 +17,23 @@ module.exports = {
         'hs-orange': '#F87759', 
         'hs-orange-light': '#FF8F73', 
         'hs-black': '#000000', 
+      },
+      keyframes: {
+        bounceCustom: {
+          '0%': {
+            transform: 'translateY(0)',
+          },
+          '50%': {
+            transform: 'translateY(-50%)', // Adjust this value for bounce height
+          },
+          '100%': {
+            transform: 'translateY(0)',
+          },
+        },
+      },
+      animation:{
+        'spin-slow': 'spin 3s linear infinite',
+        'bounce-custom-slow': 'bounceCustom 3s ease-in-out infinite',
       },
     },
   },
