@@ -1,10 +1,10 @@
 import React from 'react';
+import WebSocketProgress from './progressBar'
 
 const LoadingSpinner = () => {
   return (
     <div role="status">
-        <img src="/Zach.png" alt='' height={150} width={150} className='animate-spin-slow hover:cursor-pointer' />
-
+        <WebSocketProgress/>
         {/* <div className='flex flex-row gap-10'>
           <div className='flex flex-col gap-2'>
             <img src="/Zach.png" alt='' height={100} width={100} className='animate-spin-slow' />

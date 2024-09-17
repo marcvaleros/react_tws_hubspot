@@ -305,10 +305,10 @@ function App() {
   return (
     <>
       { loading && (
-        <div className="fixed inset-0 bg-orange-500 bg-opacity-90 flex justify-center items-center z-50">
-          <div className="flex flex-col gap-2 text-center justify-center items-center">
-              <LoadingSpinner />
-            <div className="text-white text-xl">Importing New Records To Hubspot..</div>
+        <div className="fixed inset-0 bg-hs-light-gray bg-opacity-90 flex justify-center items-center z-50">
+          <div className="flex flex-col text-center">
+            <img src="/Zach.png" alt='' height={150} width={150} className='animate-spin-slow hover:cursor-pointer self-center' />
+            <LoadingSpinner className='justify-center items-center '/>
           </div>
         </div>
       )}
