@@ -34,6 +34,107 @@ function App() {
     };
   }, [loading]);
 
+  const initializeProjectsData = async (validContacts) => {
+    const uniqueProjects = {};
+    const projectsArray = [];
+
+    validContacts.forEach((contact) => {
+      const dealName = `${contact["Project Title"]}_${contact["Project ID"]}`;
+      const descriptions =  `Project Title: ${contact["Project Title"]}\nProject Types: ${contact["Project Types"]}\nBuilding Uses: ${contact["Building Uses"]}\nProject Category: ${contact["Project Category"]}\nProject Description: ${contact["Project Description"]}\n
+      `;
+
+      if(!uniqueProjects[dealName]){
+        uniqueProjects[dealName] = {
+          'Project ID': contact["Project ID"],
+          'Dealname': dealName,
+          'Pipeline': "default",
+          'Dealstage': "239936678",
+          "Description": descriptions
+        }
+      }
+
+    });
+
+    for(const key in uniqueProjects){
+      projectsArray.push(uniqueProjects[key]);
+    }
+
+    setProjectsData(projectsArray);
+  }
+
+  const initializeCompanyData = async (validContacts) => {
+    const uniqueCompanies = {};
+    const companyArray = [];
+
+    validContacts.forEach((data) => {
+      const domain = getDomainName(data.Email, data.Website);
+      const companyName = data.Company;
+      const website = data.Website;
+      const email = data.Email;
+
+      if(!uniqueCompanies[companyName]){
+        uniqueCompanies[companyName] = {
+          Company: companyName,
+          Website: website,
+          Domain: domain,
+        }
+      }else if (email || website){
+        uniqueCompanies[companyName] = {
+          Company: companyName,
+          Website: website,
+          Domain: domain,
+        };
+      }
+    });
+    
+    for(const key in uniqueCompanies){
+      companyArray.push(uniqueCompanies[key]);
+    }
+
+    setCompanyData(companyArray);
+  }
+
+  const filterCSV = async () => {
+    const processed = new Set();
+    const validContacts = [];
+    const invalidContacts = [];
+    const duplicateEmailContacts = [];
+    
+    const filtered = fileData.filter(raw => {
+    const formattedPhone = raw.Phone ? raw.Phone.replace(/[-() ]/g, ''):'';
+
+    raw.Phone = formattedPhone;
+    return zip_codes.includes(raw.ZIP)
+    });
+
+    filtered.forEach(contact => {
+      const email = contact.Email;
+      const project = `${contact["Project Title"]}_${contact["Project ID"]}`;
+
+      const uniqueKey = `${email}_${project}`;
+
+      if(!email){
+        invalidContacts.push(contact);        //stored in the invalidContacts state
+      }else if(processed.has(uniqueKey)) {
+        duplicateEmailContacts.push(contact); //important to get the total number of duplicated emails in one project
+      }else{
+        validContacts.push(contact);          //stored in the filteredData state
+        processed.add(uniqueKey);
+      }
+    })
+
+    // console.log(`Contacts with valid email: ${validContacts.length}`);
+    // console.log(`Contacts with invalid email: ${invalidContacts.length}`);
+    // console.log(`Contacts with duplicate email: ${duplicateEmailContacts.length}`);
+    
+    setFilteredData(validContacts);
+    setInvalidData(invalidContacts);
+    setDuplicateData(duplicateEmailContacts);
+    initializeProjectsData(validContacts);
+    initializeCompanyData(validContacts);    
+    setIsFiltered(true);
+  }
+
   const toggleModal  = (message) => {
     setModalOpen(prev => !prev);
     setModalMessage(message);
@@ -97,99 +198,6 @@ function App() {
     }
     return text;
   };
-
-  const filterCSV = async () => {
-    const processed = new Set();
-    const validContacts = [];
-    const invalidContacts = [];
-    const duplicateEmailContacts = [];
-    const filtered = fileData.filter(raw => {
-    const formattedPhone = raw.Phone ? raw.Phone.replace(/[-() ]/g, ''):'';
-
-    raw.Phone = formattedPhone;
-    return zip_codes.includes(raw.ZIP)
-  });
-
-    filtered.forEach(contact => {
-      const email = contact.Email;
-      const project = `${contact["Project Title"]}_${contact["Project ID"]}`;
-
-      const uniqueKey = `${email}_${project}`;
-
-      if(!email){
-        invalidContacts.push(contact);        //stored in the invalidContacts state
-      }else if(processed.has(uniqueKey)) {
-        duplicateEmailContacts.push(contact); //important to get the total number of duplicated emails in one project
-      }else{
-        validContacts.push(contact);          //stored in the filteredData state
-        processed.add(uniqueKey);
-      }
-    })
-
-    // console.log(`Contacts with valid email: ${validContacts.length}`);
-    // console.log(`Contacts with invalid email: ${invalidContacts.length}`);
-    // console.log(`Contacts with duplicate email: ${duplicateEmailContacts.length}`);
-    
-    setFilteredData(validContacts);
-    setInvalidData(invalidContacts);
-    setDuplicateData(duplicateEmailContacts);
-    setIsFiltered(true);
-
-    const uniqueCompanies = {};
-    const companyArray = [];
-
-    const uniqueProjects = {};
-    const projectsArray = [];
-
-    filtered.forEach((contact) => {
-      const dealName = `${contact["Project Title"]}_${contact["Project ID"]}`;
-      const descriptions =  `Project Title: ${contact["Project Title"]}\nProject Types: ${contact["Project Types"]}\nBuilding Uses: ${contact["Building Uses"]}\nProject Category: ${contact["Project Category"]}\nProject Description: ${contact["Project Description"]}\n
-      `;
-
-      if(!uniqueProjects[dealName]){
-        uniqueProjects[dealName] = {
-          'Dealname': dealName,
-          'Pipeline': "default",
-          'Dealstage': "239936678",
-          "Description": descriptions
-        }
-      }
-
-    });
-
-    for(const key in uniqueProjects){
-      projectsArray.push(uniqueProjects[key]);
-    }
-
-    setProjectsData(projectsArray);
-
-    filtered.forEach((data) => {
-      const domain = getDomainName(data.Email, data.Website);
-      const companyName = data.Company;
-      const website = data.Website;
-      const email = data.Email;
-
-      if(!uniqueCompanies[companyName]){
-        uniqueCompanies[companyName] = {
-          Company: companyName,
-          Website: website,
-          Domain: domain,
-        }
-      }else if (email || website){
-        uniqueCompanies[companyName] = {
-          Company: companyName,
-          Website: website,
-          Domain: domain,
-        };
-      }
-    });
-    
-    for(const key in uniqueCompanies){
-      companyArray.push(uniqueCompanies[key]);
-    }
-
-    setCompanyData(companyArray);
-  }
 
   const importFile = async () => {
     try {
@@ -258,7 +266,7 @@ function App() {
     saveAs(blob, `PROJECT_${fileInfo.name}`);
   }
 
-  const desiredProjectColumns = ["Dealname",  "Description", "Pipeline", "Dealstage"];
+  const desiredProjectColumns = ["Project ID","Dealname",  "Description", "Pipeline", "Dealstage"];
   const desiredForImport = ["Name", "Role", "Phone", "Email", "Website", "Address", "City", "State", "ZIP"]; 
 
   const desiredColumns = ["Project ID", "Name", "Project Title", "Role", "Company", "Phone", "Email", "Website","Project Description", "Building Uses", "Project Types", "Project Category","Address", "City", "State", "ZIP"];
@@ -266,40 +274,43 @@ function App() {
   const desiredCompanyColumn = ["Company", "Website", "Domain"];  
 
   const zip_codes = [
-    "90002", "90027", "90028", "90038", "90046", "90048", "90049", "90059", "90061",
-    "90068", "90069", "90073", "90077", "90201", "90210", "90211", "90212", "90220",
-    "90221", "90222", "90240", "90241", "90242", "90262", "90263", "90265", "90270",
-    "90272", "90274", "90275", "90280", "90290", "90401", "90402", "90403", "90404",
-    "90501", "90502", "90503", "90505", "90601", "90602", "90603", "90604", "90605",
-    "90606", "90631", "90640", "90650", "90660", "90670", "90701", "90706", "90710",
-    "90712", "90713", "90717", "90723", "90732", "90744", "90745", "90746", "90747",
-    "90755", "90805", "90806", "90807", "90810", "91011", "91020", "91040", "91042",
-    "91046", "91201", "91202", "91203", "91207", "91208", "91214", "91311", "91320",
-    "91321", "91324", "91325", "91326", "91330", "91331", "91340", "91342", "91343",
-    "91344", "91345", "91350", "91351", "91352", "91354", "91355", "91360", "91361",
-    "91362", "91381", "91387", "91390", "91401", "91402", "91403", "91405", "91411",
-    "91423", "91501", "91502", "91504", "91505", "91506", "91601", "91602", "91604",
-    "91605", "91606", "91607", "91608", "91731", "91732", "91733", "91744", "91745",
-    "91746", "91748", "91755", "91770", "91789", "91792", "92821", "93010", "93012",
-    "93033", "93041", "93042", "93043", "93065", "93510", "93532", "93534", "93535",
-    "93536", "93543", "93550", "93551", "93552", "93553", "93560", "93563", "92683",
-    "92804", "92704", "92805", "90631", "92801", "92703", "92677", "92630", "92627",
-    "92647", "92530", "92780", "92708", "92620", "92707", "92646", "92618", "92840",
-    "92870", "92833", "92656", "92626", "92705", "92701", "90630", "92843", "92886",
-    "90620", "92691", "92692", "92821", "92648", "92688", "92867", "92802", "92806",
-    "92807", "92675", "92679", "92831", "92649", "92672", "92841", "92869", "90621",
-    "92660", "92706", "92883", "92612", "92602", "92673", "92604", "92653", "92835",
-    "92614", "92868", "90680", "92629", "92782", "92694", "92606", "90740", "92832",
-    "92651", "92844", "90720", "92663", "92887", "92865", "92808", "92603", "92637",
-    "92617", "92845", "92866", "90623", "92625", "92610", "92657", "92861", "92624",
-    "92655", "92823", "92676", "92661", "92662", "92697", "92698", "92710", "92725",
-    "92863", "92628", "92616", "92619", "92678", "92684", "92799", "92822", "92857",
-    "92871", "90633", "92709", "92623", "92650", "92652", "92654", "92659", "92658",
-    "92674", "92685", "92690", "92693", "92702", "92711", "92712", "92735", "92728",
-    "92781", "92803", "92811", "92809", "92814", "92812", "92816", "92815", "92817",
-    "92825", "92834", "92837", "92836", "92838", "92842", "92846", "92856", "92850",
-    "92859", "92862", "92864", "92885", "92899", "90622", "90624", "90632", "90721",
-    "90743", "90742", "92605", "92609", "92607", "92615", "90245"
+    "90027", "90263", "91321", "90049", "91401", "91040", "91344", "91301", "91316", "91011",
+    "91504", "91402", "90028", "90265", "91350", "90073", "91403", "91042", "91345", "91302",
+    "91335", "91020", "91505", "90038", "90272", "91351", "90077", "91405", "91311", "91352",
+    "91303", "91356", "91046", "91506", "90046", "90290", "91354", "90210", "91411", "91324",
+    "91402", "91304", "91364", "91201", "90048", "90402", "91355", "90211", "91423", "91325",
+    "91306", "91406", "91202", "90068", "90403", "91360", "90212", "91601", "91326", "91307",
+    "91436", "91203", "90069", "91320", "91362", "90401", "91602", "91330", "91367", "91207",
+    "90069", "91320", "91362", "90401", "91602", "91330", "91367", "91207", "91608", "91361",
+    "91381", "90404", "91604", "91331", "91371", "91208", "93010", "91384", "91605", "91340",
+    "91377", "91214", "93012", "91387", "91606", "91342", "93063", "91501", "93030", "91390",
+    "91607", "91343", "93064", "91502", "93033", "93035", "93036", "93041", "93042", "93043",
+    "93015", "93021", "93040", "93065", "93066", "93510", "92683", "92804", "92704", "92805",
+    "90631", "92801", "92703", "92677", "92630", "92627", "92647", "92530", "92780", "92708",
+    "92620", "92707", "92646", "92618", "92840", "92870", "92833", "92656", "92626", "92705",
+    "92701", "90630", "92843", "92886", "90620", "92691", "92692", "92821", "92648", "92688",
+    "92867", "92802", "92806", "92807", "92675", "92679", "92831", "92649", "92672", "92841",
+    "92869", "90621", "92660", "92706", "92883", "92612", "92602", "92673", "92604", "92653",
+    "92835", "92614", "92868", "90680", "92629", "92782", "92694", "92606", "90740", "92832",
+    "92651", "92844", "90720", "92663", "92887", "92865", "92808", "92603", "92637", "92617",
+    "92845", "92866", "90623", "92625", "92610", "92657", "92861", "92624", "92655", "92823",
+    "92676", "92661", "92662", "92697", "92698", "92710", "92725", "92863", "92628", "92616",
+    "92619", "92678", "92684", "92799", "92822", "92857", "92871", "90633", "92709", "92623",
+    "92650", "92652", "92654", "92659", "92658", "92674", "92685", "92690", "92693", "92702",
+    "92711", "92712", "92735", "92728", "92781", "92803", "92811", "92809", "92814", "92812",
+    "92816", "92815", "92817", "92825", "92834", "92837", "92836", "92838", "92842", "92846",
+    "92856", "92850", "92859", "92862", "92864", "92885", "92899", "90622", "90624", "90632",
+    "90721", "90743", "90742", "92605", "92609", "92607", "92615", "90245", "90002", "90059",
+    "90061", "90201", "90201", "90220", "90221", "90222", "90240", "90240", "90241", "90241",
+    "90242", "90247", "90248", "90249", "90250", "90254", "90260", "90262", "90266", "90270",
+    "90270", "90274", "90275", "90277", "90278", "90280", "90501", "90502", "90503", "90504",
+    "90505", "90506", "90601", "90601", "90602", "90602", "90603", "90604", "90605", "90606",
+    "90606", "90631", "90640", "90640", "90650", "90660", "90660", "90670", "90670", "90701",
+    "90706", "90710", "90712", "90713", "90717", "90723", "90732", "90744", "90745", "90746",
+    "90747", "90755", "90805", "90806", "90807", "90810", "91708", "91709", "91731", "91731",
+    "91732", "91732", "91733", "91733", "91744", "91745", "91746", "91748", "91755", "91755",
+    "91765", "91770", "91770", "91789", "91792", "92807", "92808", "92821", "92823", "92860",
+    "92870", "92880", "92882", "92886", "92887"
   ];
 
   return (
