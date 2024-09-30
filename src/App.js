@@ -4,6 +4,7 @@ import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
 import { sendToServer, uploadInvalidContacts } from './utilities/hubspot_import';
 import Modal from './components/modal';
+import FilterModal from './components/filterModal';
 import LoadingSpinner from './components/loadingSpinner';
 import DisplayContactCounts from './components/contactCount';
 
@@ -21,6 +22,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [displayImportSummary,setDisplayImportSummary] = useState(false);
   const [gdriveLink, setGdriveLink] = useState(null);
+  const [filterModal, toggleFilterModal] = useState(false);
 
   useEffect(() => {
     if (loading) {
@@ -138,6 +140,10 @@ function App() {
   const toggleModal  = (message) => {
     setModalOpen(prev => !prev);
     setModalMessage(message);
+  }
+
+  const handleModalFilter = () => {
+    toggleFilterModal( prev => !prev);
   }
 
   const handleFileChange = (event) => {
@@ -352,8 +358,9 @@ function App() {
               <div className='flex flex-row justify-between items-center gap-2 m-4'>
             
                 <button 
+                  // onClick={filterCSV}
+                  onClick={handleModalFilter}
                   className={`bg-hs-dark-gray p-4 rounded-md text-hs-background hover:bg-hs-light-gray ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  onClick={filterCSV}
                   disabled={isFiltered || !fileData}
                   >
                     <p className='font-hs-font'>Filter File</p>
@@ -430,8 +437,11 @@ function App() {
             <Modal toggleModal={toggleModal} message={modalMessage}>
             </Modal>
           ) 
-        
-        }
+          }
+
+          {filterModal && (
+            <FilterModal toggleModal={handleModalFilter}></FilterModal>
+          )}
       </div>
     
     </>

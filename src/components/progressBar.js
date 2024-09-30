@@ -4,8 +4,8 @@ const WebSocketProgress = () => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // const ws = new WebSocket(`ws://localhost:8081`); // Connect to WebSocket server
-    const ws = new WebSocket('wss://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com/');
+    const ws = new WebSocket(`ws://localhost:8081`); // Connect to WebSocket server
+    // const ws = new WebSocket('wss://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com/');
 
     ws.onopen = () => {
       console.log('WebSocket connection opened');
