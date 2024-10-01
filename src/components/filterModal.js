@@ -1,6 +1,5 @@
 import {useState} from 'react';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react'
-import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import FilterCheckboxes from './filterCheckbox';
 
 export default function FilterModal({toggleModal}) {
@@ -27,12 +26,9 @@ export default function FilterModal({toggleModal}) {
             <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
               <div className="flex flex-col space-y-2 sm:flex sm:items-center">
                 
-                <div className="self-start text-center sm:ml-4 sm:mt-0 sm:text-left gap-4">
+                <div className="self-start text-center w-full sm:ml-4 sm:mt-0 sm:text-left gap-4 sm:gap-20">
                   
-                  <div className='flex flex-row justify-center items-center gap-4'>
-                    <div className='mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gray-50 sm:mx-0 sm:h-10 sm:w-10'>
-                      <AdjustmentsHorizontalIcon aria-hidden="true" className='h-6 w-6 text-orange-600' />
-                    </div>
+                  <div className='flex flex-row justify-start items-center gap-4 '>
                     <DialogTitle as="h3" className="text-base font-semibold leading-6 text-gray-900">
                       Filter Settings
                     </DialogTitle>
