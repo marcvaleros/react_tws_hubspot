@@ -18,7 +18,7 @@ export function FilterProvider({children}) {
       "91505", "91506"
     ], 
     //store these zips as string in the database and convert it into an array in the state
-    projectTypes: ["Renovation","Sitework"],
+    projectTypes: ["Renovation","Site Work"],
     buildingUses: ["Residential Subdivision", "Retail", "Educational"]
   });
 
