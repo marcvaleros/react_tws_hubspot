@@ -8,6 +8,7 @@ import Modal from './components/modal';
 import FilterModal from './components/filterModal';
 import LoadingSpinner from './components/loadingSpinner';
 import DisplayContactCounts from './components/contactCount';
+import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 
 function App() {
   const [fileData, setFileData] = useState(null);
@@ -369,15 +370,24 @@ function App() {
               <div className='flex flex-row justify-between items-center gap-2 m-4'>
             
                 <button 
+                  onClick={handleModalFilter}
+                  className={`flex flex-row justify-center items-center gap-2 bg-hs-blue p-4 rounded-md text-hs-background hover:bg-hs-dark-blue ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={isFiltered || !fileData}
+                  >
+                    <AdjustmentsHorizontalIcon className='h-6 w-6'/>
+                    <p className='font-hs-font'>Filter Settings</p>
+                </button>
+
+                <button 
                   onClick={filterCSV}
-                  // onClick={handleModalFilter}
-                  className={`bg-hs-dark-gray p-4 rounded-md text-hs-background hover:bg-hs-light-gray ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`bg-hs-light-gray p-4 rounded-md text-hs-background hover:bg-hs-dark-gray ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={isFiltered || !fileData}
                   >
                     <p className='font-hs-font'>Filter File</p>
                 </button>
+
                 <button 
-                  className={`bg-hs-orange p-4 rounded-md text-hs-background hover:bg-hs-orange-light ${!isFiltered ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                  className={`bg-hs-orange-light p-4 rounded-md text-hs-background hover:bg-hs-orange ${!isFiltered ? 'opacity-50 cursor-not-allowed' : ''}`} 
                   onClick={importFile} 
                   disabled={!isFiltered}>
                   <p className='font-hs-font'>Import File to TWS Hubspot</p>

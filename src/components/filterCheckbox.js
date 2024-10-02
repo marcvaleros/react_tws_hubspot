@@ -28,7 +28,7 @@ export default function FilterCheckboxes() {
     <div className='flex flex-col space-y-2 self-start mx-4'>
       <div className='flex items-center'>
          <input id='filterZip' type="checkbox" checked={filters.zip} onChange={() => handleCheckBoxChange('zip')}
-         className='h-4 w-4 text-orange-500 border-gray-300 rounded-full focus:ring-orange-500 transition-all ease-in-out cursor-pointer'
+         className='h-4 w-4 text-orange-500 border-gray-300 rounded-md focus:ring-orange-500 transition-all ease-in-out cursor-pointer'
          />
          <label className="ml-2 text-sm text-gray-700">
              Excluded Zips
@@ -43,7 +43,7 @@ export default function FilterCheckboxes() {
 
       <div className='flex items-center'>
          <input id='filterProjectType' type="checkbox" checked={filters.projectType} onChange={() => handleCheckBoxChange('projectType')} 
-         className='h-4 w-4 text-orange-500 border-gray-300 rounded-full focus:ring-orange-500 transition-all ease-in-out cursor-pointer'
+         className='h-4 w-4 text-orange-500 border-gray-300 rounded-md focus:ring-orange-500 transition-all ease-in-out cursor-pointer'
          />
          <label className="ml-2 text-sm text-gray-700">
              Excluded Project Types 
@@ -72,7 +72,7 @@ export default function FilterCheckboxes() {
       
       <div className='flex items-center'>
          <input id='filterBuildingUse' type="checkbox" checked={filters.buildingUse} onChange={() => handleCheckBoxChange('buildingUse')}
-         className='h-4 w-4 text-orange-500 hover:bg-orange-400 border-gray-300 rounded-full focus:ring-orange-500 transition-all ease-in-out cursor-pointer '
+         className='h-4 w-4 text-orange-500 hover:bg-orange-400 border-gray-300 rounded-md focus:ring-orange-500 transition-all ease-in-out cursor-pointer '
          />
          <label className="ml-2 text-sm text-gray-700">
              Excluded Building Use
