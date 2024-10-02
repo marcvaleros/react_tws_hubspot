@@ -1,6 +1,7 @@
 import './App.css';
 import React, { useState, useEffect} from 'react';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { sendToServer, uploadInvalidContacts } from './utilities/hubspot_import';
 import Modal from './components/modal';
@@ -106,7 +107,7 @@ function App() {
     const formattedPhone = raw.Phone ? raw.Phone.replace(/[-() ]/g, ''):'';
 
     raw.Phone = formattedPhone;
-    return zip_codes.includes(raw.ZIP)
+    return !zip_codes.includes(raw.ZIP)
     });
 
     filtered.forEach(contact => {
@@ -149,6 +150,8 @@ function App() {
   const handleFileChange = (event) => {
     event.preventDefault();
     const file = event.target.files[0];
+    const fileType = file.type;
+
     if(file){
       setFileData([]);
       setFileInfo({ name: '', type: '' });
@@ -157,10 +160,31 @@ function App() {
       setCompanyData([]);
       setDisplayImportSummary(false);
       setGdriveLink(null);
-
-      setFileInfo({ name: file.name, type: file.type });
-      parseFile(file);
+      
+      if(fileType === 'text/csv'){
+        setFileInfo({ name: file.name, type: file.type });
+        parseFile(file);
+      }else if(fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'){
+        convertXLSXtoCSV(file);
+      }
     }
+  }
+
+  const convertXLSXtoCSV = (file) =>{
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type : 'array'});
+      const sheetName = workbook.SheetNames[1]; //access the second sheet
+      const worksheet = workbook.Sheets[sheetName];
+      const csvData = XLSX.utils.sheet_to_csv(worksheet);
+      
+      setFileInfo({ name: file.name.replace(/\.[^/.]+$/, ".csv"), type: "text/csv" });
+      parseFile(csvData);
+    };
+
+    reader.readAsArrayBuffer(file);
   }
 
   const parseFile = (file) =>{
@@ -168,7 +192,7 @@ function App() {
       header: true,
       complete: (results) => {
         setFileData(results.data);
-        // console.log("Parsed CSV data:", results.data);
+        // console.log(`Results Data: ${JSON.stringify(results.data)}`);
       },
     });
   }
@@ -178,7 +202,9 @@ function App() {
     e.stopPropagation();
 
     const file = e.dataTransfer.files[0];
-    if (file) {
+    const fileType = file.type;
+
+    if(file){
       setFileData([]);
       setFileInfo({ name: '', type: '' });
       setIsFiltered(false);
@@ -186,9 +212,13 @@ function App() {
       setCompanyData([]);
       setDisplayImportSummary(false);
       setGdriveLink(null);
-
-      setFileInfo({ name: file.name, type: file.type });
-      parseFile(file);
+      
+      if(fileType === 'text/csv'){
+        setFileInfo({ name: file.name, type: file.type });
+        parseFile(file);
+      }else if(fileType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'){
+        convertXLSXtoCSV(file);
+      }
     }
   }
 
@@ -311,9 +341,10 @@ function App() {
       )}
       <div>
         <div className="h-screen flex flex-col items-center justify-center bg-hs-background ">
-          <h1 className='text-lg text-hs-orange uppercase'>
-            Please upload a raw file to convert to final file (ONLY ACCEPTS CSV FILE FORMAT)
+          <h1 className='text-4xl text-hs-orange uppercase'>
+            ZACH-O-MATIC 🤖✨ 
           </h1>
+          <h4 className='text-hs-dark-gray'>IMPORT CONSTRUCT CONNECT FILE TO HUBSPOT</h4>
           <div className="container m-6 px-[100px]" onDrop={handleDrop} onDragOver={handleDragOver}>
             <label
                 className="flex justify-center w-full h-[300px] transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none hover:bg-hs-gray">
@@ -338,8 +369,8 @@ function App() {
               <div className='flex flex-row justify-between items-center gap-2 m-4'>
             
                 <button 
-                  // onClick={filterCSV}
-                  onClick={handleModalFilter}
+                  onClick={filterCSV}
+                  // onClick={handleModalFilter}
                   className={`bg-hs-dark-gray p-4 rounded-md text-hs-background hover:bg-hs-light-gray ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={isFiltered || !fileData}
                   >
