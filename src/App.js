@@ -9,6 +9,7 @@ import FilterModal from './components/filterModal';
 import LoadingSpinner from './components/loadingSpinner';
 import DisplayContactCounts from './components/contactCount';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { useFilter } from './context/FilterContext';
 
 function App() {
   const [fileData, setFileData] = useState(null);
@@ -25,6 +26,7 @@ function App() {
   const [displayImportSummary,setDisplayImportSummary] = useState(false);
   const [gdriveLink, setGdriveLink] = useState(null);
   const [filterModal, toggleFilterModal] = useState(false);
+  const {filters} = useFilter();
 
   useEffect(() => {
     if (loading) {
@@ -105,10 +107,24 @@ function App() {
     const duplicateEmailContacts = [];
     
     const filtered = fileData.filter(raw => {
-    const formattedPhone = raw.Phone ? raw.Phone.replace(/[-() ]/g, ''):'';
+      const formattedPhone = raw.Phone ? raw.Phone.replace(/[-() ]/g, ''):'';
+      raw.Phone = formattedPhone;
+      let isValid = true;
 
-    raw.Phone = formattedPhone;
-    return !zip_codes.includes(raw.ZIP)
+      if(filters.zip){
+        isValid = isValid && !filters.zipCodes.includes(raw.ZIP);
+      }
+
+      if(filters.projectType){
+        isValid = isValid && !filters.projectTypes.includes(raw["Project Types"]);
+      }
+
+      if(filters.buildingUse){
+        isValid = isValid && !filters.buildingUses.includes(raw["Building Uses"]);
+      }
+
+      return isValid;
+
     });
 
     filtered.forEach(contact => {
@@ -126,10 +142,6 @@ function App() {
         processed.add(uniqueKey);
       }
     })
-
-    // console.log(`Contacts with valid email: ${validContacts.length}`);
-    // console.log(`Contacts with invalid email: ${invalidContacts.length}`);
-    // console.log(`Contacts with duplicate email: ${duplicateEmailContacts.length}`);
     
     setFilteredData(validContacts);
     setInvalidData(invalidContacts);
@@ -151,7 +163,7 @@ function App() {
   const handleFileChange = (event) => {
     event.preventDefault();
     const file = event.target.files[0];
-    const fileType = file.type;
+    const fileType = file?.type;
 
     if(file){
       setFileData([]);
@@ -321,14 +333,14 @@ function App() {
   // ]; 
 
   //san fernando valley zips
-  const zip_codes = [
-    "91401", "91403", "91405", "91411", "91423", "91601", "91602", "91604", "91605", "91606", "91607",
-    "91040", "91042", "91311", "91324", "91325", "91326", "91330", "91331", "91340", "91342", "91343", 
-    "91344", "91345", "91352", "91402", "91301", "91302", "91303", "91304", "91306", "91307", "91367", 
-    "91371", "91377", "93063", "93064", "91316", "91335", "91356", "91364", "91406", "91436", "91011", 
-    "91020", "91046", "91201", "91202", "91203", "91207", "91208", "91214", "91501", "91502", "91504", 
-    "91505", "91506"
-  ];
+  // const zip_codes = [
+  //   "91401", "91403", "91405", "91411", "91423", "91601", "91602", "91604", "91605", "91606", "91607",
+  //   "91040", "91042", "91311", "91324", "91325", "91326", "91330", "91331", "91340", "91342", "91343", 
+  //   "91344", "91345", "91352", "91402", "91301", "91302", "91303", "91304", "91306", "91307", "91367", 
+  //   "91371", "91377", "93063", "93064", "91316", "91335", "91356", "91364", "91406", "91436", "91011", 
+  //   "91020", "91046", "91201", "91202", "91203", "91207", "91208", "91214", "91501", "91502", "91504", 
+  //   "91505", "91506"
+  // ];
 
   return (
     <>
@@ -371,8 +383,7 @@ function App() {
             
                 <button 
                   onClick={handleModalFilter}
-                  className={`flex flex-row justify-center items-center gap-2 bg-hs-blue p-4 rounded-md text-hs-background hover:bg-hs-dark-blue ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={isFiltered || !fileData}
+                  className={`flex flex-row justify-center items-center gap-2 bg-hs-blue p-4 rounded-md text-hs-background hover:bg-hs-dark-blue `}
                   >
                     <AdjustmentsHorizontalIcon className='h-6 w-6'/>
                     <p className='font-hs-font'>Filter Settings</p>
@@ -380,8 +391,8 @@ function App() {
 
                 <button 
                   onClick={filterCSV}
-                  className={`bg-hs-light-gray p-4 rounded-md text-hs-background hover:bg-hs-dark-gray ${isFiltered || !fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={isFiltered || !fileData}
+                  className={`bg-hs-light-gray p-4 rounded-md text-hs-background hover:bg-hs-dark-gray ${!fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={!fileData}
                   >
                     <p className='font-hs-font'>Filter File</p>
                 </button>
