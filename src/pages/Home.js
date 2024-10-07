@@ -9,7 +9,8 @@ import LoadingSpinner from '../components/loadingSpinner';
 import DisplayContactCounts from '../components/contactCount';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import { useFilter } from '../context/FilterContext';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
 
 function Home() {
   const [fileData, setFileData] = useState(null);
@@ -27,6 +28,7 @@ function Home() {
   const [gdriveLink, setGdriveLink] = useState(null);
   const [filterModal, toggleFilterModal] = useState(false);
   const {filters} = useFilter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (loading) {
@@ -39,6 +41,12 @@ function Home() {
       document.body.classList.remove('overflow-hidden');
     };
   }, [loading]);
+
+  const handleLogOut = () => {
+    //erase the localstorage before logout 
+    localStorage.removeItem('authToken');
+    navigate('/magic-link-request');
+  }
 
   const initializeProjectsData = async (validContacts) => {
     const uniqueProjects = {};
@@ -354,6 +362,7 @@ function Home() {
       )}
       <div>
         <div className="h-screen flex flex-col items-center justify-center bg-hs-background ">
+          {/* <button className='button bg-red-500 self-end p-4 rounded-md text-white mr-16' onClick={handleLogOut}>Sign Out</button> */}
           <h1 className='text-4xl text-hs-orange uppercase'>
             ZACH-O-MATIC 🤖✨ 
           </h1>

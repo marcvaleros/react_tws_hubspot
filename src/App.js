@@ -4,15 +4,24 @@ import {Routes, Route ,useLocation} from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import VerificationPage from './pages/Verification';
+import ProtectedRoute from './components/protectedRoute';
+import NotFound from './pages/NotFound';
 
 function App() {
   const location = useLocation();
 
   return (
     <Routes location={location} key={location.key}>
-      <Route path='/' element={<Home/>} />
+      {/* Protected route for authenticated users, if the token expires it will redirect to magiclink request page  */}
+      <Route path='/' element={<ProtectedRoute element={Home}/>} />
+
+      {/* Public Routes  */}
       <Route path='/magic-link-request' element={<Login />} />
       <Route path='/auth/login/:token' element={<VerificationPage/>} />
+
+      {/* 404 Routes  */}
+      <Route path='/404' element={ <NotFound/> } />
+      <Route path="*" element={<NotFound/>} />
     </Routes>
   );
 }
