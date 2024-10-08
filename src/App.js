@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import VerificationPage from './pages/Verification';
 import ProtectedRoute from './components/protectedRoute';
 import NotFound from './pages/NotFound';
+import TWSFranchisee from './pages/TWSFranchisee';
 
 function App() {
   const location = useLocation();
@@ -14,6 +15,8 @@ function App() {
     <Routes location={location} key={location.key}>
       {/* Protected route for authenticated users, if the token expires it will redirect to magiclink request page  */}
       <Route path='/' element={<ProtectedRoute element={Home}/>} />
+      <Route path='/tws_franchisee' element={<ProtectedRoute element={TWSFranchisee}/>} />
+      <Route path='/users' element={<ProtectedRoute element={TWSFranchisee}/>} />
 
       {/* Public Routes  */}
       <Route path='/magic-link-request' element={<Login />} />

@@ -9,7 +9,7 @@ import LoadingSpinner from '../components/loadingSpinner';
 import DisplayContactCounts from '../components/contactCount';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import { useFilter } from '../context/FilterContext';
-import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/navbar';
 
 
 function Home() {
@@ -28,7 +28,7 @@ function Home() {
   const [gdriveLink, setGdriveLink] = useState(null);
   const [filterModal, toggleFilterModal] = useState(false);
   const {filters} = useFilter();
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     if (loading) {
@@ -42,11 +42,6 @@ function Home() {
     };
   }, [loading]);
 
-  const handleLogOut = () => {
-    //erase the localstorage before logout 
-    localStorage.removeItem('authToken');
-    navigate('/magic-link-request');
-  }
 
   const initializeProjectsData = async (validContacts) => {
     const uniqueProjects = {};
@@ -361,15 +356,17 @@ function Home() {
         </div>
       )}
       <div>
-        <div className="h-screen flex flex-col items-center justify-center bg-hs-background ">
-          {/* <button className='button bg-red-500 self-end p-4 rounded-md text-white mr-16' onClick={handleLogOut}>Sign Out</button> */}
-          <h1 className='text-4xl text-hs-orange uppercase'>
-            ZACH-O-MATIC 🤖✨ 
-          </h1>
-          <h4 className='text-hs-dark-gray'>IMPORT CONSTRUCT CONNECT FILE TO HUBSPOT</h4>
-          <div className="container m-6 px-[100px]" onDrop={handleDrop} onDragOver={handleDragOver}>
+        <Navbar/>
+        <div className="max-w-7xl h-[500px] mx-auto bg-hs-background mt-12">
+
+          <div className="flex flex-col justify-center items-center">
+            <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-xl'>IMPORT CONSTRUCT CONNECT FILE TO HUBSPOT</h4>
+          </div>
+
+            {/* file upload component  */}
+          <div className="mx-16 my-2" onDrop={handleDrop} onDragOver={handleDragOver}>
             <label
-                className="flex justify-center w-full h-[300px] transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-gray-400 focus:outline-none hover:bg-hs-gray">
+                className="flex justify-center w-full h-[300px] transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-hs-dark-blue focus:outline-none hover:bg-blue-50">
                 <div className="flex items-center space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" strokeWidth="2">
@@ -386,9 +383,9 @@ function Home() {
                 </div>
                 <input type="file" name="file_upload" accept=".csv,.xlsx" className="hidden" onChange={handleFileChange} />
             </label>
-        </div>
-    
-              <div className='flex flex-row justify-between items-center gap-2 m-4'>
+          </div>
+            
+              <div className='flex flex-row justify-center items-center gap-2 m-4'>
             
                 <button 
                   onClick={handleModalFilter}
@@ -416,7 +413,7 @@ function Home() {
 
               {isFiltered && (
                 <>
-                  <div className='flex flex-row gap-2'>
+                  <div className='flex flex-row gap-2 justify-center items-center'>
                   <button onClick={downloadCompanyCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
                     <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Companies CSV
                   </button>
@@ -472,7 +469,6 @@ function Home() {
           </div>
             )
           }
-
 
           {isModalOpen && (
             <Modal toggleModal={toggleModal} message={modalMessage}>
