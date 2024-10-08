@@ -32,7 +32,7 @@ export default function TWSFranchisee() {
             <div className='flex flex-row justify-center items-center gap-2 cursor-pointer'>
               {
                 franchisees.map((franchisee, index) => (
-                  <Card props={franchisee}/>
+                  <Card key={index} props={franchisee}/>
                 ))
               }
             </div>
