@@ -1,9 +1,9 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import React, { useState, useEffect} from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import createApiInstance from '../utilities/apiAuth';
 import { Link } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 
 
 function classNames(...classes) {
@@ -11,10 +11,9 @@ function classNames(...classes) {
 }
 
 export default function Navbar() {
-  const [user, setUser] = useState({});
+  const {user} = useUser();
   const navigate = useNavigate();
   const location = useLocation();
-  const api = createApiInstance(navigate);
   const [currentNav, setCurrentNav] = useState('Home');
 
   const isActive = (href) => {
@@ -27,19 +26,6 @@ export default function Navbar() {
     { name: 'Users', href: '/users', current: false },
   ]
 
-  useEffect(() => {
-    
-    const fetchUserData = async () => {
-      try {
-        const res = await api.get('/user');
-        console.log(JSON.stringify(res.data, null, 2));
-        setUser(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    fetchUserData();
-  }, []);
 
   const handleLogOut = () => {
     //erase the localstorage before logout 
@@ -89,7 +75,7 @@ export default function Navbar() {
           
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
             <div
-              className="relative rounded-full bg-hs-dark-blue p-1 text-white hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 px-4 hidden lg:block"
+              className="relative rounded-full p-1 text-white hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 px-4 hidden lg:block"
             >
               <span className="absolute -inset-1.5" />
               <span className="sr-only">View notifications</span>

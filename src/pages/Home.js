@@ -114,6 +114,7 @@ function Home() {
       raw.Phone = formattedPhone;
       let isValid = true;
 
+      //exclude or include config here 
       if(filters.zip){
         isValid = isValid && !filters.zipCodes.includes(raw.ZIP);
       }
