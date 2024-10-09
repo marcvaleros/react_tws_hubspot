@@ -13,9 +13,14 @@ export function UserProvider({children}) {
     const api = createApiInstance(navigate);
     const fetchUserData = async () => {
       try {
-        const res = await api.get('/user');
-        console.log(JSON.stringify(res.data, null, 2));
-        setUser(res.data);
+        const token = localStorage.getItem('authToken');
+        if(token){
+          const res = await api.get('/user');
+          console.log(JSON.stringify(res.data, null, 2));
+          setUser(res.data);
+        }else{
+          console.log('No User Logged In');
+        }
       } catch (error) {
         console.log(error);
       }

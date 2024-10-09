@@ -16,8 +16,8 @@ function App() {
     <Routes location={location} key={location.key}>
       {/* Protected route for authenticated users, if the token expires it will redirect to magiclink request page  */}
       <Route path='/' element={<ProtectedRoute element={Home}/>} />
-      <Route path='/tws_franchisee' element={<ProtectedRoute element={TWSFranchisee}/>} />
-      <Route path='/users' element={<ProtectedRoute element={UserList}/>} />
+      <Route path='/tws_franchisee' element={<ProtectedRoute element={TWSFranchisee} requiredRole={"admin"} />} />
+      <Route path='/users' element={<ProtectedRoute element={UserList} requiredRole={"admin"}/>} />
 
       {/* Public Routes  */}
       <Route path='/magic-link-request' element={<Login />} />

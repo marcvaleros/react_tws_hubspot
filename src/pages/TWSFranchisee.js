@@ -1,28 +1,17 @@
-import React, { useEffect, useState } from 'react'
+import React, {useEffect} from 'react'
 import Navbar from '../components/navbar'
-import createApiInstance from '../utilities/apiAuth';
-import { useNavigate } from 'react-router-dom';
+import { useFranchisee } from '../context/FranchiseeContext';
 
 export default function TWSFranchisee() {
-  const navigate = useNavigate();
-  const [franchisees, setFranchisees] = useState([]);
-  
+  const {franchisees, selectedFranchisee, handleRowSelect} = useFranchisee();
+
   useEffect(() => {
-    const api = createApiInstance(navigate);
-    const fetchFranchisees = async () => {
-      try {
-        const res = await api.get('/franchisees/list');
-        console.log(JSON.stringify(res.data, null, 2));
-        setFranchisees(res.data);
-      } catch (error) {
-        console.log(error);
-      }
+    const storedFranchisee = JSON.parse(localStorage.getItem('selectedFranchisee'));
+    if (storedFranchisee) {
+      handleRowSelect(storedFranchisee);
     }
+  }, []);
 
-    fetchFranchisees();
-  }, [navigate]);
-
- 
   return (
       <div className='flex flex-col min-h-screen bg-hs-background space-y-8 '>
         <Navbar />
@@ -44,15 +33,12 @@ export default function TWSFranchisee() {
                           <th scope="col" className="px-6 py-3">
                               SDR Assigned 
                           </th>
-                          <th scope="col" className="px-6 py-3">
-                              <span className="sr-only">Edit</span>
-                          </th>
                       </tr>
                   </thead>
                   <tbody>
-                    {
+                    { franchisees.length > 0 && 
                       franchisees.map((franchisee, index) => (
-                        <tr key={index} className=" bg-hs-background  hover:bg-hs-gray text-hs-dark-gray">
+                        <tr onClick={() => handleRowSelect(franchisee)} key={index}  className={`bg-hs-background  text-hs-dark-gray ${(selectedFranchisee.id === franchisee.id)  ? 'bg-hs-dark-blue text-white hover:bg-hs-dark-blue' : 'hover:bg-hs-gray'}`}>
                           <th scope="row" className="px-6 py-4 whitespace-nowrap ">
                               {franchisee.owner}
                           </th>
@@ -60,13 +46,16 @@ export default function TWSFranchisee() {
                               {franchisee.name}
                           </td>
                           <td className="px-6 py-4">
-                              {franchisee.hubspot_api_key}
+                              {franchisee.hubspot_api_key ? franchisee.hubspot_api_key : 'N/A' }
                           </td>
                           <td className="px-6 py-4">
-                              {franchisee.createdAt}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                              {/* <a href="/tws_franchisee" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a> */}
+                              {
+                                franchisee.users.length > 0 ? 
+                                franchisee.users.map((user, index) => (
+                                  <span key={index}>{user.email}</span>
+                                )) :
+                                "N/A"
+                              }
                           </td>
                         </tr>
                       ))

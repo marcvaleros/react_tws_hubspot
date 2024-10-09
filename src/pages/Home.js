@@ -10,6 +10,8 @@ import DisplayContactCounts from '../components/contactCount';
 import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import { useFilter } from '../context/FilterContext';
 import Navbar from '../components/navbar';
+import { useUser } from '../context/UserContext';
+import { useFranchisee } from '../context/FranchiseeContext';
 
 
 function Home() {
@@ -28,7 +30,8 @@ function Home() {
   const [gdriveLink, setGdriveLink] = useState(null);
   const [filterModal, toggleFilterModal] = useState(false);
   const {filters} = useFilter();
-
+  const {user} = useUser();
+  const {selectedFranchisee, handleRowSelect} = useFranchisee();
 
   useEffect(() => {
     if (loading) {
@@ -42,7 +45,14 @@ function Home() {
     };
   }, [loading]);
 
-
+  useEffect(() => {
+    // Get the stored franchisee from localStorage when the component mounts
+    const storedFranchisee = JSON.parse(localStorage.getItem('selectedFranchisee'));
+    if (storedFranchisee) {
+      handleRowSelect(storedFranchisee);
+    }
+  }, []);
+  
   const initializeProjectsData = async (validContacts) => {
     const uniqueProjects = {};
     const projectsArray = [];
@@ -175,7 +185,7 @@ function Home() {
       setIsFiltered(false);
       setFilteredData([]);
       setCompanyData([]);
-      setDisplayImportSummary(false);
+      setDisplayImportSummary(true);
       setGdriveLink(null);
       
       if(fileType === 'text/csv'){
@@ -227,7 +237,7 @@ function Home() {
       setIsFiltered(false);
       setFilteredData([]);
       setCompanyData([]);
-      setDisplayImportSummary(false);
+      setDisplayImportSummary(true);
       setGdriveLink(null);
       
       if(fileType === 'text/csv'){
@@ -264,17 +274,22 @@ function Home() {
       const contactBlob2 = createCSVBlob(filteredData, desiredForImport);
       const projectBlob = createCSVBlob(projectsData, desiredProjectColumns);
 
-      await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading);
+      if(user.role === 'agent'){
+        await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, user?.franchisee?.hubspot_api_key);
+      }else{
+        await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, selectedFranchisee?.hubspot_api_key);
+      }
+
     
       if(invalidData.length > 0){
         const invalidContactBlob = createCSVBlob(invalidData, desiredColumns);
         const link = await uploadInvalidContacts(fileInfo.name, invalidContactBlob);
         console.log(`Gdrive link: ${link}`);
         setGdriveLink(link);
-        setDisplayImportSummary(true);
+        // setDisplayImportSummary(true);
       }else{
         console.log("There is nothing to upload to drive because there are no invalid contacts");
-        setDisplayImportSummary(true);
+        // setDisplayImportSummary(true);
       }
 
     } catch (error) {
@@ -360,8 +375,23 @@ function Home() {
         <Navbar/>
         <div className="max-w-7xl h-[500px] mx-auto bg-hs-background mt-12">
 
-          <div className="flex flex-col justify-center items-center">
-            <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-xl'>IMPORT CONSTRUCT CONNECT FILE TO HUBSPOT</h4>
+          <div className="flex flex-col justify-center items-center"> 
+            {
+              user.role === 'agent' ? (
+                <>
+                 <h4 className='text-hs-blue text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{user.franchisee?.name}</h4>
+                 <h4 className='text-hs-blue text-sm sm:text-sm md:text-sm lg:text-xl'>{console.log(user.franchisee?.hubspot_api_key)
+                 }</h4>
+                  
+                </>
+              ) : (
+                <>
+                 <h4 className='text-hs-blue text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{selectedFranchisee?.name}</h4>
+                 <h4 className='text-hs-blue text-sm sm:text-sm md:text-sm lg:text-xl'>{selectedFranchisee?.hubspot_api_key}</h4>
+                </>
+              )
+            }
+            <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-xl'>Import Construct Connect file to HubSpot</h4>
           </div>
 
             {/* file upload component  */}
@@ -405,27 +435,26 @@ function Home() {
                 </button>
 
                 <button 
-                  className={`bg-hs-orange-light p-4 rounded-md text-hs-background hover:bg-hs-orange ${!isFiltered ? 'opacity-50 cursor-not-allowed' : ''}`} 
+                  className={`bg-hs-orange-light p-4 rounded-md text-hs-background hover:bg-hs-orange ${(!isFiltered || !selectedFranchisee?.hubspot_api_key) ? 'opacity-50 cursor-not-allowed' : ''}`} 
                   onClick={importFile} 
-                  disabled={!isFiltered}>
+                  disabled={!isFiltered || !selectedFranchisee.hubspot_api_key}>
                   <p className='font-hs-font'>Import File to TWS Hubspot</p>
                 </button>
               </div>
 
               {isFiltered && (
-                <>
-                  <div className='flex flex-row gap-2 justify-center items-center'>
-                  <button onClick={downloadCompanyCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
-                    <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Companies CSV
-                  </button>
-                  <button onClick={downloadFilteredCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
-                    <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Contacts with Emails CSV
-                  </button>
-                  <button onClick={downloadProjectCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
-                    <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Projects CSV
-                  </button>
-                  
-                  </div>
+                <div className='flex flex-col w-full'>
+                  <div className='flex flex-row gap-2 justify-center'>
+                    <button onClick={downloadCompanyCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
+                      <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Companies CSV
+                    </button>
+                    <button onClick={downloadFilteredCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
+                      <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Contacts with Emails CSV
+                    </button>
+                    <button onClick={downloadProjectCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
+                      <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Projects CSV
+                    </button>
+                  </div >
                     { displayImportSummary && (
                       <DisplayContactCounts
                         link={gdriveLink}
@@ -435,41 +464,42 @@ function Home() {
                     />
                     )
                     }
-                </>
+                </div>
               )}
-        </div>
-        
+        <div>
           {filteredData.length > 0 && (
-              <div className="overflow-x-auto p-4 max-h-[500px]">
-              <table className="min-w-full border border-gray-300 divide-y divide-gray-200 text-[10px]">
-                <thead className="bg-gray-100">
-                  <tr>
+              <div className="overflow-x-auto ">
+                <table className="border border-gray-200 divide-y divide-gray-200 text-[10px]">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      {desiredColumns.map((column) => (
+                        <th key={column} className=" py-1 border-b text-left whitespace-nowrap">
+                          {column}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                {filteredData.map((row, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
                     {desiredColumns.map((column) => (
-                      <th key={column} className=" py-1 border-b text-left whitespace-nowrap">
-                        {column}
-                      </th>
+                      <td
+                        key={column}
+                        className="px-2 py-1 border-b max-w-[100px] overflow-hidden text-ellipsis whitespace-normal break-words"
+                        title={row[column] || ''}
+                      >
+                        {truncateText(row[column] || '', 10)}
+                      </td>
                     ))}
                   </tr>
-                </thead>
-                <tbody>
-              {filteredData.map((row, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  {desiredColumns.map((column) => (
-                    <td
-                      key={column}
-                      className="px-2 py-1 border-b max-w-[100px] overflow-hidden text-ellipsis whitespace-normal break-words"
-                      title={row[column] || ''}
-                    >
-                      {truncateText(row[column] || '', 10)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-                </tbody>
-              </table>
-          </div>
+                ))}
+                  </tbody>
+                </table>
+              </div>
             )
           }
+        </div>
+        </div>
 
           {isModalOpen && (
             <Modal toggleModal={toggleModal} message={modalMessage}>

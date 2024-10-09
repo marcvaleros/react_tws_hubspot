@@ -22,14 +22,15 @@ export default function Navbar() {
   
   const navigation = [
     { name: 'Home', href: '/', current: true },
-    { name: 'TWS Franchisee', href: '/tws_franchisee', current: false },
-    { name: 'Users', href: '/users', current: false },
+    ...(user.role === 'admin'? [{name: 'TWS Franchisee', href: '/tws_franchisee', current: false}] : []),
+    ...(user.role === 'admin'? [{name: 'Users', href: '/users', current: false}] : []),
   ]
 
 
   const handleLogOut = () => {
     //erase the localstorage before logout 
     localStorage.removeItem('authToken');
+    localStorage.removeItem('selectedFranchisee');
     navigate('/magic-link-request');
   }
 
@@ -112,21 +113,19 @@ export default function Navbar() {
 
       <DisclosurePanel className="sm:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
-          {navigation.map((item) => (
-            <DisclosureButton
-              key={item.name}
-              as={Link}
-              href={item.href}
-              onClick={() => setCurrentNav(item.name)}
-                    aria-current={currentNav === item.name ? 'page' : undefined}
+            {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => setCurrentNav(item.href)}
                     className={classNames(
-                      currentNav === item.name ? 'bg-hs-background text-hs-blue' : 'transition-all ease-in-out text-300 hover:bg-hs-dark-blue hover:text-hs-background',
+                      isActive(item.href) ? 'bg-hs-background text-hs-blue' : 'transition-all ease-in-out text-300 hover:bg-hs-dark-blue hover:text-hs-background',
                       'rounded-md px-3 py-2 text-sm font-medium',
                     )}
-            >
-              {item.name}
-            </DisclosureButton>
-          ))}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
         </div>
       </DisclosurePanel>
     </Disclosure>

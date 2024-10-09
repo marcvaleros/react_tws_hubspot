@@ -2,9 +2,9 @@ import React from 'react';
 
 const DisplayContactCounts = ({ validContacts, invalidContacts, duplicateEmailContacts, link }) => {
   return (
-    <div className="container m-6 px-[100px]">
+    <div className="flex flex-col m-6">
       <div className="text-center mb-8 rounded-lg p-4">
-        <h1 className="text-2xl font-bold mb-4 text-hs-orange">Import Summary</h1>
+        <h1 className="text-2xl font-bold mb-4 text-hs-orange">Filter Summary</h1>
         <div className="flex justify-center space-x-4">
           <div className="flex flex-row gap-2 justify-center items-center bg-green-100 text-green-600 p-4 rounded-lg">
             <p className="text-2xl rounded-md bg-white px-4 py-2">{validContacts?.length || 0}</p>

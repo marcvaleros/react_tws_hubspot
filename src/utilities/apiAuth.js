@@ -16,7 +16,7 @@ const createApiInstance = (navigate) => {
         //remove jwt and redirect to homepage?
         localStorage.removeItem('authToken');
         navigate('/magic-link-request');
-        throw new axios.Cancel('Token expired');
+        // throw new axios.Cancel('Token expired');
       }
       return config;
     },

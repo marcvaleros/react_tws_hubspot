@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/navbar'
 import createApiInstance from '../utilities/apiAuth';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function UserList() {
   const navigate = useNavigate();
@@ -45,7 +45,7 @@ export default function UserList() {
                               Hubspot Key 
                           </th>
                           <th scope="col" className="px-6 py-3">
-                              <span className="sr-only">Assign to Franchisee</span>
+                              Action
                           </th>
                       </tr>
                   </thead>
@@ -66,7 +66,14 @@ export default function UserList() {
                               {user.franchisee?.hubspot_api_key ? user.franchisee.hubspot_api_key : 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-right">
-                              {/* <a href="/tws_franchisee" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a> */}
+                            {
+                              user.role === "agent" ? (
+                                <Link to="/tws_franchisee" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                  Assign
+                                </Link>
+                              ) : null
+                            }
+                            
                           </td>
                         </tr>
                       ))
