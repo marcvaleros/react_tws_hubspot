@@ -7,10 +7,10 @@ const UserContext = createContext();
 export function UserProvider({children}) {
   const [user, setUser] = useState({});
   const navigate = useNavigate();
-  const api = createApiInstance(navigate);
+  // const api = createApiInstance(navigate);
 
   useEffect(() => {
-    
+    const api = createApiInstance(navigate);
     const fetchUserData = async () => {
       try {
         const res = await api.get('/user');
@@ -21,7 +21,7 @@ export function UserProvider({children}) {
       }
     }
     fetchUserData();
-  });
+  }, [navigate]);
 
   return (
   <UserContext.Provider value={{user}}>

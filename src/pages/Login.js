@@ -10,7 +10,7 @@ export default function Login() {
     if(authToken) {
       navigate('/');
     }
-  });
+  }, [navigate]);
 
   return (
     <div className='flex flex-row justify-center items-center min-h-screen bg-hs-background text-white'>

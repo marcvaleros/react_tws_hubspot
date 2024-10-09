@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 export default function UserList() {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
-  const api = createApiInstance(navigate);
-
+  
   useEffect(() => {
+    const api = createApiInstance(navigate);
     const fetchUsers = async () => {
       try {
         const res = await api.get('/users/list');
@@ -20,7 +20,7 @@ export default function UserList() {
     }
 
     fetchUsers();
-  });
+  }, [navigate]);
 
  
   return (

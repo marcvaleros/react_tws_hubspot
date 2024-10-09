@@ -6,9 +6,9 @@ import { useNavigate } from 'react-router-dom';
 export default function TWSFranchisee() {
   const navigate = useNavigate();
   const [franchisees, setFranchisees] = useState([]);
-  const api = createApiInstance(navigate);
-
+  
   useEffect(() => {
+    const api = createApiInstance(navigate);
     const fetchFranchisees = async () => {
       try {
         const res = await api.get('/franchisees/list');
@@ -20,7 +20,7 @@ export default function TWSFranchisee() {
     }
 
     fetchFranchisees();
-  });
+  }, [navigate]);
 
  
   return (
