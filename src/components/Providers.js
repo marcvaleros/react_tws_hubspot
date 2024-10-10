@@ -7,14 +7,12 @@ import { FranchiseeProvider } from '../context/FranchiseeContext';
 
 export default function Providers({children}) {
   return (
-    <FilterProvider>
-        <FranchiseeProvider>
-          <UserProvider>
-            {/* <ThemeProvider> */}
-            {children}
-            {/* </ThemeProvider> */}
-          </UserProvider>
-        </FranchiseeProvider>
+    <FranchiseeProvider>
+      <FilterProvider>
+        <UserProvider>
+          {children}
+        </UserProvider>
       </FilterProvider>
+    </FranchiseeProvider>
   )
 }

@@ -51,7 +51,8 @@ function Home() {
     if (storedFranchisee) {
       handleRowSelect(storedFranchisee);
     }
-  }, []);
+     // eslint-disable-next-line
+  }, []); 
   
   const initializeProjectsData = async (validContacts) => {
     const uniqueProjects = {};
@@ -362,7 +363,7 @@ function Home() {
   // ];
 
   return (
-    <>
+    <div className='bg-hs-dark-gray min-h-screen'>
       { loading && (
         <div className="fixed inset-0 bg-hs-light-gray bg-opacity-90 flex justify-center items-center z-50">
           <div className="flex flex-col text-center">
@@ -373,21 +374,21 @@ function Home() {
       )}
       <div>
         <Navbar/>
-        <div className="max-w-7xl h-[500px] mx-auto  mt-12">
+        <div className="max-w-7xl mx-auto  mt-12">
 
           <div className="flex flex-col justify-center items-center"> 
             {
               user.role === 'agent' ? (
                 <>
-                 <h4 className='text-hs-blue text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{user.franchisee?.name}</h4>
-                 <h4 className='text-hs-blue text-sm sm:text-sm md:text-sm lg:text-xl'>{console.log(user.franchisee?.hubspot_api_key)
-                 }</h4>
+                 <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{user.franchisee?.name}</h4>
+                 {/* <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-xl'>{console.log(user.franchisee?.hubspot_api_key)
+                 }</h4> */}
                   
                 </>
               ) : (
                 <>
-                 <h4 className='text-hs-blue text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{selectedFranchisee?.name}</h4>
-                 <h4 className='text-hs-blue text-sm sm:text-sm md:text-sm lg:text-xl'>{selectedFranchisee?.hubspot_api_key}</h4>
+                 <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{selectedFranchisee?.name}</h4>
+                 {/* <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-xl'>{selectedFranchisee?.hubspot_api_key}</h4> */}
                 </>
               )
             }
@@ -397,17 +398,17 @@ function Home() {
             {/* file upload component  */}
           <div className="mx-16 my-2" onDrop={handleDrop} onDragOver={handleDragOver}>
             <label
-                className="flex justify-center w-full h-[300px] transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-hs-dark-blue focus:outline-none hover:bg-blue-50">
+                className="flex justify-center w-full h-[300px] transition bg-hs-dark-gray border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-hs-background focus:outline-none hover:bg-hs-light-gray">
                 <div className="flex items-center space-x-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24"
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round"
                             d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
-                    <div className="font-medium text-gray-600">
+                    <div className="font-medium text-white">
                         Drop files to upload, or
                         <span className="text-blue-600 underline"> browse</span>
-                      <p className='text-hs-dark-gray'>{fileInfo.name || 'No file selected'}</p>
+                      <p className='text-hs-background'>{fileInfo.name || 'No file selected'}</p>
                     </div>
                     <div>
                     </div>
@@ -416,89 +417,89 @@ function Home() {
             </label>
           </div>
             
-              <div className='flex flex-row justify-center items-center gap-2 m-4'>
-            
-                <button 
-                  onClick={handleModalFilter}
-                  className={`flex flex-row justify-center items-center gap-2 bg-hs-blue p-4 rounded-md text-hs-background hover:bg-hs-dark-blue `}
-                  >
-                    <AdjustmentsHorizontalIcon className='h-6 w-6'/>
-                    <p className='font-hs-font'>Filter Settings</p>
-                </button>
+          <div className='flex flex-row justify-center items-center gap-2 m-4'>
+        
+            <button 
+              onClick={handleModalFilter}
+              className={`transition-all ease-in-out flex flex-row justify-center items-center gap-2 bg-hs-blue p-4 rounded-md text-hs-background hover:bg-hs-dark-blue `}
+              >
+                <AdjustmentsHorizontalIcon className='h-6 w-6'/>
+                <p className='font-hs-font'>Filter Settings</p>
+            </button>
 
-                <button 
-                  onClick={filterCSV}
-                  className={`bg-hs-light-gray p-4 rounded-md text-hs-background hover:bg-hs-dark-gray ${!fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  disabled={!fileData}
-                  >
-                    <p className='font-hs-font'>Filter File</p>
-                </button>
+            <button 
+              onClick={filterCSV}
+              className={`transition-all ease-in-out p-4 bg-hs-light-gray rounded-md text-hs-background hover:bg-[#252535ec] ${!fileData ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!fileData}
+              >
+                <p className='font-hs-font'>Filter File</p>
+            </button>
 
-                <button 
-                  className={`bg-hs-orange-light p-4 rounded-md text-hs-background hover:bg-hs-orange ${(!isFiltered || !selectedFranchisee?.hubspot_api_key) ? 'opacity-50 cursor-not-allowed' : ''}`} 
-                  onClick={importFile} 
-                  disabled={!isFiltered || !selectedFranchisee.hubspot_api_key}>
-                  <p className='font-hs-font'>Import File to TWS Hubspot</p>
-                </button>
-              </div>
+            <button 
+              className={`transition-all ease-in-out bg-hs-orange-light p-4 rounded-md text-hs-background hover:bg-hs-orange ${(!isFiltered || !selectedFranchisee?.hubspot_api_key) ? 'opacity-50 cursor-not-allowed' : ''}`} 
+              onClick={importFile} 
+              disabled={!isFiltered || !selectedFranchisee.hubspot_api_key}>
+              <p className='font-hs-font'>Import File to TWS Hubspot</p>
+            </button>
+          </div>
 
-              {isFiltered && (
-                <div className='flex flex-col w-full'>
-                  <div className='flex flex-row gap-2 justify-center'>
-                    <button onClick={downloadCompanyCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
-                      <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Companies CSV
-                    </button>
-                    <button onClick={downloadFilteredCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
-                      <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Contacts with Emails CSV
-                    </button>
-                    <button onClick={downloadProjectCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
-                      <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Projects CSV
-                    </button>
-                  </div >
-                    { displayImportSummary && (
-                      <DisplayContactCounts
-                        link={gdriveLink}
-                        validContacts={filteredData}
-                        invalidContacts={invalidData}
-                        duplicateEmailContacts={duplicateData}
-                    />
-                    )
-                    }
-                </div>
-              )}
-        <div>
-          {filteredData.length > 0 && (
-              <div className="overflow-x-auto ">
-                <table className="border border-gray-200 divide-y divide-gray-200 text-[10px]">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      {desiredColumns.map((column) => (
-                        <th key={column} className=" py-1 border-b text-left whitespace-nowrap">
-                          {column}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                {filteredData.map((row, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    {desiredColumns.map((column) => (
-                      <td
-                        key={column}
-                        className="px-2 py-1 border-b max-w-[100px] overflow-hidden text-ellipsis whitespace-normal break-words"
-                        title={row[column] || ''}
-                      >
-                        {truncateText(row[column] || '', 10)}
-                      </td>
+          {isFiltered && (
+            <div className='flex flex-col bg-hs-dark-gray'>
+              <div className='flex flex-row gap-2 justify-center'>
+                <button onClick={downloadCompanyCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
+                  <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Companies CSV
+                </button>
+                <button onClick={downloadFilteredCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
+                  <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Contacts with Emails CSV
+                </button>
+                <button onClick={downloadProjectCSV} className='flex items-center bg-green-100 text-green-900 p-2 rounded-lg border-green-700 border-2 hover:bg-green-700 hover:text-white transition ease-in-out'>
+                  <img src="/gsheets_logo.png" height={15} width={20} alt='' className='mr-2' /> Download Projects CSV
+                </button>
+              </div >
+                { displayImportSummary && (
+                  <DisplayContactCounts
+                    link={gdriveLink}
+                    validContacts={filteredData}
+                    invalidContacts={invalidData}
+                    duplicateEmailContacts={duplicateData}
+                />
+                )
+                }
+            </div>
+          )}
+            <div>
+              {filteredData.length > 0 && (
+                  <div className="overflow-x-auto ">
+                    <table className="border border-gray-200 divide-y divide-gray-200 text-[10px] bg-gray-50 cursor-pointer">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          {desiredColumns.map((column) => (
+                            <th key={column} className=" py-1 border-b text-left whitespace-nowrap">
+                              {column}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                    {filteredData.map((row, index) => (
+                      <tr key={index} className="hover:bg-hs-gray">
+                        {desiredColumns.map((column) => (
+                          <td
+                            key={column}
+                            className="px-2 py-1 border-b max-w-[100px] overflow-hidden text-ellipsis whitespace-normal break-words"
+                            title={row[column] || ''}
+                          >
+                            {truncateText(row[column] || '', 10)}
+                          </td>
+                        ))}
+                      </tr>
                     ))}
-                  </tr>
-                ))}
-                  </tbody>
-                </table>
-              </div>
-            )
-          }
-        </div>
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              }
+            </div>
         </div>
 
           {isModalOpen && (
@@ -512,7 +513,7 @@ function Home() {
           )}
       </div>
     
-    </>
+    </div>
   );
 }
 

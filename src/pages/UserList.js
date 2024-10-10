@@ -12,7 +12,6 @@ export default function UserList() {
     const fetchUsers = async () => {
       try {
         const res = await api.get('/users/list');
-        console.log(JSON.stringify(res.data, null, 2));
         setUsers(res.data);
       } catch (error) {
         console.log(error);

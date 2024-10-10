@@ -105,7 +105,7 @@ export default function Accordion() {
                         <ul className="list-disc ml-5">
                           {
                             ver.list.map((item,index) => (
-                              <li className='font-medium text-white/50'><span className='font-bold text-white'>{item.title}:</span> {item.content}</li>
+                              <li className='font-medium text-white/50'><span className='font-bold text-hs-orange'>{item.title}:</span> {item.content}</li>
                             ))
                           }
                          

@@ -18,6 +18,7 @@ module.exports = {
         'hs-orange': '#F87759', 
         'hs-orange-light': '#FF8F73', 
         'hs-black': '#000000', 
+        'hs-green': '#24bb24', 
       },
       keyframes: {
         bounceCustom: {

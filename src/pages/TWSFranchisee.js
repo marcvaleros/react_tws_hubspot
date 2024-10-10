@@ -10,6 +10,7 @@ export default function TWSFranchisee() {
     if (storedFranchisee) {
       handleRowSelect(storedFranchisee);
     }
+     // eslint-disable-next-line
   }, []);
 
   return (
@@ -18,7 +19,7 @@ export default function TWSFranchisee() {
         <div className='max-w-7xl mx-auto flex flex-col p-4 justify-center items-center'>
           <h1 className='text-2xl text-hs-background my-2 self-center'>LIST OF TWS FRANCHISEES</h1>
           <div className="relative overflow-x-auto shadow-lg sm:rounded-lg mx-12">
-              <table className="w-full text-sm text-left rtl:text-right text-white cursor-pointer">
+              <table className="w-full  text-sm text-left rtl:text-right text-white cursor-pointer">
                   <thead className="text-xs text-hs-background uppercase bg-hs-light-gray ">
                       <tr>
                           <th scope="col" className="px-6 py-3">
@@ -33,12 +34,15 @@ export default function TWSFranchisee() {
                           <th scope="col" className="px-6 py-3">
                               SDR Assigned 
                           </th>
+                          <th scope="col" className="px-6 py-3">
+                              Zips
+                          </th>
                       </tr>
                   </thead>
                   <tbody>
                     { franchisees.length > 0 && 
                       franchisees.map((franchisee, index) => (
-                        <tr onClick={() => handleRowSelect(franchisee)} key={index}  className={`bg-hs-background  text-hs-dark-gray ${(selectedFranchisee.id === franchisee.id)  ? 'bg-hs-dark-blue text-white hover:bg-hs-dark-blue' : 'hover:bg-hs-gray'}`}>
+                        <tr onClick={() => handleRowSelect(franchisee)} key={index}  className={`bg-hs-background  text-hs-dark-gray ${(selectedFranchisee.id === franchisee.id)  ? 'bg-hs-orange text-white hover:bg-hs-orange' : 'hover:bg-hs-gray'}`}>
                           <th scope="row" className="px-6 py-4 whitespace-nowrap ">
                               {franchisee.owner}
                           </th>
@@ -48,6 +52,7 @@ export default function TWSFranchisee() {
                           <td className="px-6 py-4">
                               {franchisee.hubspot_api_key ? franchisee.hubspot_api_key : 'N/A' }
                           </td>
+                        
                           <td className="px-6 py-4">
                               {
                                 franchisee.users.length > 0 ? 
@@ -56,6 +61,14 @@ export default function TWSFranchisee() {
                                 )) :
                                 "N/A"
                               }
+                          </td>
+
+                          <td className="px-6 py-4 text-sm">
+                          {franchisee.settings ? 
+                            (franchisee.settings.zips.length > 20 
+                              ? franchisee.settings.zips.slice(0, 20) + '...' 
+                              : franchisee.settings.zips) 
+                            : 'N/A'}
                           </td>
                         </tr>
                       ))
