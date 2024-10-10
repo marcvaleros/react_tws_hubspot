@@ -91,7 +91,7 @@ export default function Accordion() {
             <>
               {
                 versions.map((ver, index) => (
-                  <Disclosure as="div" className="p-6" defaultOpen={index=== 0 ? true: false}>
+                  <Disclosure key={index} as="div" className="p-6" defaultOpen={index=== 0 ? true: false}>
                       <DisclosureButton className="group flex w-full items-center justify-between">
                         <span className="text-start text-sm/6 font-medium text-white group-data-[hover]:text-white/80">
                           <p>{ver.version_title}</p>
@@ -105,7 +105,7 @@ export default function Accordion() {
                         <ul className="list-disc ml-5">
                           {
                             ver.list.map((item,index) => (
-                              <li className='font-medium text-white/50'><span className='font-bold text-hs-orange'>{item.title}:</span> {item.content}</li>
+                              <li key={index} className='font-medium text-white/50'><span className='font-bold text-hs-orange'>{item.title}:</span> {item.content}</li>
                             ))
                           }
                          
