@@ -1,6 +1,6 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
@@ -14,7 +14,6 @@ export default function Navbar() {
   const {user} = useUser();
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentNav, setCurrentNav] = useState('Home');
 
   const isActive = (href) => {
     return location.pathname === href;
@@ -24,6 +23,7 @@ export default function Navbar() {
     { name: 'Home', href: '/', current: true },
     ...(user.role === 'admin'? [{name: 'TWS Franchisee', href: '/tws_franchisee', current: false}] : []),
     ...(user.role === 'admin'? [{name: 'Users', href: '/users', current: false}] : []),
+    { name: 'Versions', href: '/version', current: false },
   ]
 
 
@@ -50,8 +50,8 @@ export default function Navbar() {
 
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
             <div className="flex flex-shrink-0 items-center">
-              <h1 className='text-2xl text-hs-background uppercase mx-auto cursor-pointer'>
-                zachomatic✨
+              <h1 className='text-2xl text-hs-background mx-auto cursor-pointer'>
+                ZACH-O-MATIC ver 1.1 ✨
               </h1>
             </div>
             <div className="hidden sm:ml-6 sm:block">
@@ -60,7 +60,6 @@ export default function Navbar() {
                   <Link
                     key={item.name}
                     to={item.href}
-                    onClick={() => setCurrentNav(item.href)}
                     className={classNames(
                       isActive(item.href) ? 'bg-hs-background text-hs-blue' : 'transition-all ease-in-out text-300 hover:bg-hs-dark-blue hover:text-hs-background',
                       'rounded-md px-3 py-2 text-sm font-medium',
@@ -117,7 +116,6 @@ export default function Navbar() {
                   <Link
                     key={item.name}
                     to={item.href}
-                    onClick={() => setCurrentNav(item.href)}
                     className={classNames(
                       isActive(item.href) ? 'bg-hs-background text-hs-blue' : 'transition-all ease-in-out text-300 hover:bg-hs-dark-blue hover:text-hs-background',
                       'rounded-md px-3 py-2 text-sm font-medium',

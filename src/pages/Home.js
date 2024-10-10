@@ -373,7 +373,7 @@ function Home() {
       )}
       <div>
         <Navbar/>
-        <div className="max-w-7xl h-[500px] mx-auto bg-hs-background mt-12">
+        <div className="max-w-7xl h-[500px] mx-auto  mt-12">
 
           <div className="flex flex-col justify-center items-center"> 
             {

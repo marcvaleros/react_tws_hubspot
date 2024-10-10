@@ -8,6 +8,7 @@ import ProtectedRoute from './components/protectedRoute';
 import NotFound from './pages/NotFound';
 import TWSFranchisee from './pages/TWSFranchisee';
 import UserList from './pages/UserList';
+import Version from './pages/Version';
 
 function App() {
   const location = useLocation();
@@ -18,6 +19,7 @@ function App() {
       <Route path='/' element={<ProtectedRoute element={Home}/>} />
       <Route path='/tws_franchisee' element={<ProtectedRoute element={TWSFranchisee} requiredRole={"admin"} />} />
       <Route path='/users' element={<ProtectedRoute element={UserList} requiredRole={"admin"}/>} />
+      <Route path='/version' element={<ProtectedRoute element={Version}/>} />
 
       {/* Public Routes  */}
       <Route path='/magic-link-request' element={<Login />} />

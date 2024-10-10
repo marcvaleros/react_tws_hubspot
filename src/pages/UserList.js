@@ -24,10 +24,10 @@ export default function UserList() {
 
  
   return (
-      <div className='flex flex-col min-h-screen bg-hs-background space-y-8 '>
+      <div className='flex flex-col min-h-screen bg-hs-dark-gray space-y-8 '>
         <Navbar />
         <div className='max-w-7xl mx-auto flex flex-col p-4 justify-center items-center'>
-          <h1 className='text-2xl text-hs-dark-blue my-2 self-center'>LIST OF USERS/SDR</h1>
+          <h1 className='text-2xl text-hs-background my-2 self-center'>LIST OF USERS/SDR</h1>
           <div className="relative overflow-x-auto shadow-md sm:rounded-lg mx-12">
               <table className="w-full text-sm text-left rtl:text-right text-white cursor-pointer">
                   <thead className="text-xs text-hs-background uppercase bg-hs-light-gray ">
