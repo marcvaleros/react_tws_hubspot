@@ -4,7 +4,7 @@ import isTokenExpired from './checkTokenExpiration';
 const createApiInstance = (navigate) => {
   
   const api = axios.create({
-    baseURL: `${process.env.REACT_APP_BACKEND_URL}api/auth`,
+    baseURL: `${process.env.REACT_APP_BACKEND_URL}/api/auth`,
   });
   
   api.interceptors.request.use(

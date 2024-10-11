@@ -25,7 +25,7 @@ function Dropdown(props) {
     const token = localStorage.getItem('authToken');
     try {
       //change the base url once deployed
-      const response = await axios.put(`${process.env.REACT_APP_BACKEND_URL}api/auth/user/${props.user_id}/update/${franchisee.id}`, {}, {
+      const response = await axios.put(`${process.env.REACT_APP_BACKEND_URL}/api/auth/user/${props.user_id}/update/${franchisee.id}`, {}, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

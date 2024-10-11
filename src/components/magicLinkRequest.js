@@ -14,7 +14,7 @@ const MagicLinkRequest = () => {
     setFormState((prevState) => ({ ...prevState, loading: true }));
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}api/auth/signup`, {
+      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/signup`, {
         email: formState.email,
       });
       setFormState({

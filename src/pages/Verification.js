@@ -14,7 +14,7 @@ export default function Verification() {
       try {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}api/auth/verification/${token}`);
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/verification/${token}`);
         console.log(response);
         
         if(response && response.data.token){
