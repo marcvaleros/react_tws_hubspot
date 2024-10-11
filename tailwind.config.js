@@ -10,6 +10,7 @@ module.exports = {
       },
       colors: {
         'hs-blue': '#0091AE',
+        'hs-dark-blue': '#007689',
         'hs-background': '#fefefe', 
         'hs-gray': '#dde2e5', 
         'hs-light-gray': '#425B76', 
@@ -17,6 +18,7 @@ module.exports = {
         'hs-orange': '#F87759', 
         'hs-orange-light': '#FF8F73', 
         'hs-black': '#000000', 
+        'hs-green': '#24bb24', 
       },
       keyframes: {
         bounceCustom: {
