@@ -28,7 +28,7 @@ export async function uploadInvalidContacts(filename, invalidContactBlob){
   }
 }
 
-export async function sendToServer(fileName, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubspot_api_key) {
+export async function sendToServer(fileName, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubspot_api_key, dealStage) {
   let form = new FormData();
   form.append('files', contactBlob, 'Construct Connect Contacts Main.csv');
   form.append('files', companyBlob, 'Construct Connect Company.csv');
@@ -36,6 +36,7 @@ export async function sendToServer(fileName, contactBlob, companyBlob, contactBl
   form.append('files', projectBlob, 'Construct Connect Projects.csv');
   form.append('filename', fileName);
   form.append('hubspot_api_key', hubspot_api_key);
+  form.append('deal_stage', dealStage);
 
   if(hubspot_api_key !== ''){
     try {

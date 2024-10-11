@@ -57,7 +57,7 @@ export default function UserList() {
                               {user.role}
                           </td>
                           
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 truncate">
                               {user.franchisee?.hubspot_api_key ? user.franchisee.hubspot_api_key : 'N/A'}
                           </td>
                           <td className="px-6 py-4 text-right">
@@ -66,7 +66,6 @@ export default function UserList() {
                                   <Dropdown franchisee={user.franchisee} user_id={user.id}/>
                               ) : null
                             }
-                            
                           </td>
                         </tr>
                       ))

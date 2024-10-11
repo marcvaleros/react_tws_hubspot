@@ -8,7 +8,6 @@ import axios from 'axios';
 function Dropdown(props) {
   const [query, setQuery] = useState('');
   const {franchisees} = useFranchisee();
-  //set selected to be the assigned tws
   const [selected, setSelected] = useState(props.franchisee);
 
   useEffect(()=>{
