@@ -57,7 +57,7 @@ export default function TWSFranchisee() {
                               {
                                 franchisee.users.length > 0 ? 
                                 franchisee.users.map((user, index) => (
-                                  <span key={index}>{user.email}</span>
+                                  <p key={index}>{user.email}</p>
                                 )) :
                                 "N/A"
                               }
