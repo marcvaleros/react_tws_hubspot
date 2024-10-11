@@ -1,19 +1,23 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
 import { useFilter } from '../context/FilterContext';
+import { useFranchisee } from '../context/FranchiseeContext';
 
 const FilterCheckboxes = forwardRef((props, ref) => {
-  const { filters, handleCheckBoxChange, updateFilterConfig, updateZipConfig } = useFilter();
+  const {selectedFranchisee} = useFranchisee();
+  const { filters, handleCheckBoxChange, updateFilterConfig, updateZipConfig, updateFilterValue } = useFilter();
   const [inputBar, setInputBar] = useState([false, false]);
   const [formData, setFormData] = useState({
-    content: '',
-    buildingContent: '',
-    zipContent: filters.zipCodes.join(','),
+    include: filters.include,
+    content: selectedFranchisee?.settings?.projectTypes,
+    buildingContent: selectedFranchisee?.settings?.buildingUses,
+    zipContent: selectedFranchisee?.settings?.zips,
   });
 
   // Save configuration function
   const saveConfiguration = () => {
     const zipArray = formData.zipContent.split(',').map(zip => zip.trim()).filter(zip => zip);
     updateZipConfig(zipArray);
+    updateFilterValue('include', formData.include);
     setFormData({ ...formData, zipContent: '' });
   };
 
@@ -23,10 +27,12 @@ const FilterCheckboxes = forwardRef((props, ref) => {
 
   // Handle input changes
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    const inputValue = type === 'checkbox' ? checked : value;
+    
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value,
+      [name]: inputValue,
     }));
   };
 
@@ -45,6 +51,24 @@ const FilterCheckboxes = forwardRef((props, ref) => {
 
   return (
     <div className="flex flex-col space-y-2 self-start mx-4">
+      {/* <input name="include" type='checkbox' checked={formData.include} onChange={handleInputChange}></input> */}
+
+      <div className="flex items-center space-x-2">
+        <span className="text-sm text-gray-700">{formData.include ? 'Include' : 'Exclude'}</span>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input 
+            name='include'
+            type="checkbox" 
+            checked={formData.include} 
+            onChange={handleInputChange} 
+            className="sr-only peer"
+          />
+          <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-orange-500  transition-all"></div>
+          <div className="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-full"></div>
+        </label>
+      </div>
+
+
       {/* ZIP Filter */}
       <div className="flex items-center">
         <input
@@ -54,7 +78,7 @@ const FilterCheckboxes = forwardRef((props, ref) => {
           onChange={() => handleCheckBoxChange('zip')}
           className="h-4 w-4 text-orange-500 border-gray-300 rounded-md focus:ring-orange-500 transition-all ease-in-out cursor-pointer"
         />
-        <label className="ml-2 text-sm text-gray-700">Excluded Zips</label>
+        <label className="ml-2 text-sm text-gray-700">{formData.include ? 'Included':'Excluded'} Zips</label>
       </div>
 
       {filters.zip && (
@@ -69,6 +93,8 @@ const FilterCheckboxes = forwardRef((props, ref) => {
         />
       )}
 
+
+
       {/* Project Type Filter */}
       <div className="flex items-center mb-4">
         <input
@@ -78,7 +104,7 @@ const FilterCheckboxes = forwardRef((props, ref) => {
           onChange={() => handleCheckBoxChange('projectType')}
           className="h-4 w-4 text-orange-500 border-gray-300 rounded-md focus:ring-orange-500 transition-all ease-in-out cursor-pointer"
         />
-        <label className="ml-2 text-sm text-gray-700">Excluded Project Types</label>
+        <label className="ml-2 text-sm text-gray-700">{formData.include ? 'Included':'Excluded'} Project Types</label>
         {inputBar[0] && (
           <input
             name="content"
@@ -120,7 +146,7 @@ const FilterCheckboxes = forwardRef((props, ref) => {
           onChange={() => handleCheckBoxChange('buildingUse')}
           className="h-4 w-4 text-orange-500 hover:bg-orange-400 border-gray-300 rounded-md focus:ring-orange-500 transition-all ease-in-out cursor-pointer"
         />
-        <label className="ml-2 text-sm text-gray-700">Excluded Building Use</label>
+        <label className="ml-2 text-sm text-gray-700">{formData.include ? 'Included':'Excluded'} Building Use</label>
         {inputBar[1] && (
           <input
             name="buildingContent"

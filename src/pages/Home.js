@@ -32,7 +32,7 @@ function Home() {
   const {filters} = useFilter();
   const {user} = useUser();
   const {selectedFranchisee, handleRowSelect} = useFranchisee();
-
+  
   useEffect(() => {
     if (loading) {
       document.body.classList.add('overflow-hidden');
@@ -125,18 +125,32 @@ function Home() {
       raw.Phone = formattedPhone;
       let isValid = true;
 
-      //exclude or include config here 
-      if(filters.zip){
-        isValid = isValid && !filters.zipCodes.includes(raw.ZIP);
+      if(filters.include){ // if we should include the those with zips
+        if(filters.zip){
+          isValid = isValid && filters.zipCodes.includes(raw.ZIP);
+        }
+  
+        if(filters.projectType){
+          isValid = isValid && filters.projectTypes.includes(raw["Project Types"]);
+        }
+  
+        if(filters.buildingUse){
+          isValid = isValid && filters.buildingUses.includes(raw["Building Uses"]);
+        }
+      }else{ // if we should exclude  those found in the zips
+        if(filters.zip){
+          isValid = isValid && !filters.zipCodes.includes(raw.ZIP);
+        }
+  
+        if(filters.projectType){
+          isValid = isValid && !filters.projectTypes.includes(raw["Project Types"]);
+        }
+  
+        if(filters.buildingUse){
+          isValid = isValid && !filters.buildingUses.includes(raw["Building Uses"]);
+        }
       }
-
-      if(filters.projectType){
-        isValid = isValid && !filters.projectTypes.includes(raw["Project Types"]);
-      }
-
-      if(filters.buildingUse){
-        isValid = isValid && !filters.buildingUses.includes(raw["Building Uses"]);
-      }
+      
 
       return isValid;
 
@@ -265,6 +279,7 @@ function Home() {
 
   const importFile = async () => {
     try {
+      let dealStage, hubkey;
       const createCSVBlob = (data, columns) => {
         const csvData = Papa.unparse(data, {columns});
         return new Blob([csvData], {type: 'text/csv;charset=utf-8;' });
@@ -276,9 +291,22 @@ function Home() {
       const projectBlob = createCSVBlob(projectsData, desiredProjectColumns);
 
       if(user.role === 'agent'){
-        await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, user?.franchisee?.hubspot_api_key);
+        hubkey = user?.franchisee?.hubspot_api_key;
+        dealStage = user?.franchisee?.settings?.dealStageId;
+        if(dealStage && hubkey){
+          await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubkey,dealStage);
+        }else{
+          console.log("Undefined Deal Stage or HubKey ID.");
+        }
+        
       }else{
-        await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, selectedFranchisee?.hubspot_api_key);
+        hubkey = selectedFranchisee?.hubspot_api_key;
+        dealStage = selectedFranchisee?.settings?.dealStageId;
+        if(dealStage && hubkey){
+          await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubkey, dealStage);
+        }else{
+          console.log("Undefined Deal Stage or HubKey ID.");
+        }
       }
 
     
@@ -342,26 +370,6 @@ function Home() {
 
   const desiredCompanyColumn = ["Company", "Website", "Domain"];  
 
-  //san gabriel valley zips
-  // const zip_codes = [
-  //   "91001", "91006", "91007", "91008", "91010", "91016", "91024", "91107", "91706", "91775", "91776", 
-  //   "91780", "91702", "91711", "91722", "91723", "91724", "91740", "91741", "91750", "91766", "91767", 
-  //   "91768", "91773", "91790", "91791", "91701", "91710", "91730", "91737", "91761", "91762", "91763", 
-  //   "91764", "91784", "91786", "91739", "92313", "92316", "92324", "92335", "92336", "92337", "92346", 
-  //   "92350", "92354", "92359", "92369", "92373", "92374", "92376", "92377", "92401", "92404", "92405", 
-  //   "92407", "92408", "92410", "92411", "92415"
-  // ]; 
-
-  //san fernando valley zips
-  // const zip_codes = [
-  //   "91401", "91403", "91405", "91411", "91423", "91601", "91602", "91604", "91605", "91606", "91607",
-  //   "91040", "91042", "91311", "91324", "91325", "91326", "91330", "91331", "91340", "91342", "91343", 
-  //   "91344", "91345", "91352", "91402", "91301", "91302", "91303", "91304", "91306", "91307", "91367", 
-  //   "91371", "91377", "93063", "93064", "91316", "91335", "91356", "91364", "91406", "91436", "91011", 
-  //   "91020", "91046", "91201", "91202", "91203", "91207", "91208", "91214", "91501", "91502", "91504", 
-  //   "91505", "91506"
-  // ];
-
   return (
     <div className='bg-hs-dark-gray min-h-screen'>
       { loading && (
@@ -380,15 +388,12 @@ function Home() {
             {
               user.role === 'agent' ? (
                 <>
-                 <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{user.franchisee?.name}</h4>
-                 {/* <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-xl'>{console.log(user.franchisee?.hubspot_api_key)
-                 }</h4> */}
+                 <h4 className='text-white text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{user.franchisee?.name}</h4>
                   
                 </>
               ) : (
                 <>
-                 <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{selectedFranchisee?.name}</h4>
-                 {/* <h4 className='text-hs-orange text-sm sm:text-sm md:text-sm lg:text-xl'>{selectedFranchisee?.hubspot_api_key}</h4> */}
+                 <h4 className='text-white text-sm sm:text-sm md:text-sm lg:text-4xl uppercase'>{selectedFranchisee?.name}</h4>
                 </>
               )
             }
@@ -436,9 +441,9 @@ function Home() {
             </button>
 
             <button 
-              className={`transition-all ease-in-out bg-hs-orange-light p-4 rounded-md text-hs-background hover:bg-hs-orange ${(!isFiltered || !selectedFranchisee?.hubspot_api_key) ? 'opacity-50 cursor-not-allowed' : ''}`} 
+              className={`transition-all ease-in-out bg-hs-orange-light p-4 rounded-md text-hs-background hover:bg-hs-orange ${!isFiltered ? 'opacity-50 cursor-not-allowed' : ''}`} 
               onClick={importFile} 
-              disabled={!isFiltered || !selectedFranchisee.hubspot_api_key}>
+              disabled={!isFiltered}>
               <p className='font-hs-font'>Import File to TWS Hubspot</p>
             </button>
           </div>
@@ -469,8 +474,8 @@ function Home() {
           )}
             <div>
               {filteredData.length > 0 && (
-                  <div className="overflow-x-auto ">
-                    <table className="border border-gray-200 divide-y divide-gray-200 text-[10px] bg-gray-50 cursor-pointer">
+                  <div className="overflow-x-auto">
+                    <table className="border border-gray-200 divide-y divide-gray-200 text-[10px] bg-gray-50 cursor-pointer mb-8 ">
                       <thead className="bg-gray-100">
                         <tr>
                           {desiredColumns.map((column) => (
