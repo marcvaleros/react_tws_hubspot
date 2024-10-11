@@ -1,8 +1,7 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-// const BASE_URL ="https://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com";
-const BASE_URL ="http://localhost:8080";
+const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
 export async function uploadInvalidContacts(filename, invalidContactBlob){
   let form = new FormData();
@@ -10,7 +9,7 @@ export async function uploadInvalidContacts(filename, invalidContactBlob){
   form.append('file', invalidContactBlob, fileName);
 
   try {
-    const res = await axios.post(`${BASE_URL}/upload-to-drive`, form, {
+    const res = await axios.post(`${BASE_URL}upload-to-drive`, form, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
@@ -41,7 +40,7 @@ export async function sendToServer(fileName, contactBlob, companyBlob, contactBl
   if(hubspot_api_key !== ''){
     try {
       setLoading(true);
-      const res = await axios.post(`${BASE_URL}/upload/contacts`, form, {
+      const res = await axios.post(`${BASE_URL}upload/contacts`, form, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }
