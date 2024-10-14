@@ -10,7 +10,7 @@ export async function uploadInvalidContacts(filename, invalidContactBlob){
   form.append('file', invalidContactBlob, fileName);
 
   try {
-    const res = await axios.post(`${BASE_URL}upload-to-drive`, form, {
+    const res = await axios.post(`${BASE_URL}/upload-to-drive`, form, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
@@ -41,7 +41,7 @@ export async function sendToServer(fileName, contactBlob, companyBlob, contactBl
   if(hubspot_api_key !== ''){
     try {
       setLoading(true);
-      const res = await axios.post(`${BASE_URL}upload/contacts`, form, {
+      const res = await axios.post(`${BASE_URL}/upload/contacts`, form, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }
