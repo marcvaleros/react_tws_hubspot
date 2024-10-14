@@ -53,12 +53,65 @@ function Home() {
     }
      // eslint-disable-next-line
   }, []); 
+
+  const importFile = async () => {
+    try {
+      let dealStage, hubkey;
+      const createCSVBlob = (data, columns) => {
+        const csvData = Papa.unparse(data, {columns});
+        return new Blob([csvData], {type: 'text/csv;charset=utf-8;' });
+      }
+
+      const contactBlob = createCSVBlob(filteredData, desiredColumns);
+      const companyBlob = createCSVBlob(companyData, desiredCompanyColumn);
+      const contactBlob2 = createCSVBlob(filteredData, desiredForImport);
+      const projectBlob = createCSVBlob(projectsData, desiredProjectColumns);
+
+      if(user.role === 'agent'){
+        hubkey = user?.franchisee?.hubspot_api_key;
+        dealStage = user?.franchisee?.settings?.dealStageId;
+        if(dealStage && hubkey){
+          await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubkey,dealStage);
+        }else{
+          console.log("Undefined Deal Stage or HubKey ID.");
+        }
+        
+      }else{
+        hubkey = selectedFranchisee?.hubspot_api_key;
+        dealStage = selectedFranchisee?.settings?.dealStageId;
+        console.log(`Admin - dealStage: ${dealStage}`);
+        
+
+        if(dealStage && hubkey){
+          await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubkey, dealStage);
+        }else{
+          console.log("Undefined Deal Stage or HubKey ID.");
+        }
+      }
+
+    
+      if(invalidData.length > 0){
+        const invalidContactBlob = createCSVBlob(invalidData, desiredColumns);
+        const link = await uploadInvalidContacts(fileInfo.name, invalidContactBlob);
+        console.log(`Gdrive link: ${link}`);
+        setGdriveLink(link);
+        // setDisplayImportSummary(true);
+      }else{
+        console.log("There is nothing to upload to drive because there are no invalid contacts");
+        // setDisplayImportSummary(true);
+      }
+
+    } catch (error) {
+      console.log(`Error processing files: ${error}`);
+    }
+  }
   
   const initializeProjectsData = async (validContacts) => {
     const uniqueProjects = {};
     const projectsArray = [];
 
     validContacts.forEach((contact) => {
+      const dealStage = user.role === "agent" ? user?.franchisee?.settings?.dealStageId : selectedFranchisee?.settings?.dealStageId;
       const dealName = `${contact["Project Title"]}_${contact["Project ID"]}`;
       const descriptions =  `Project Title: ${contact["Project Title"]}\nProject Types: ${contact["Project Types"]}\nBuilding Uses: ${contact["Building Uses"]}\nProject Category: ${contact["Project Category"]}\nProject Description: ${contact["Project Description"]}\n
       `;
@@ -68,7 +121,7 @@ function Home() {
           'Project ID': contact["Project ID"],
           'Dealname': dealName,
           'Pipeline': "default",
-          'Dealstage': "239936678",
+          'Dealstage': dealStage,
           "Description": descriptions
         }
       }
@@ -276,55 +329,6 @@ function Home() {
     }
     return text;
   };
-
-  const importFile = async () => {
-    try {
-      let dealStage, hubkey;
-      const createCSVBlob = (data, columns) => {
-        const csvData = Papa.unparse(data, {columns});
-        return new Blob([csvData], {type: 'text/csv;charset=utf-8;' });
-      }
-
-      const contactBlob = createCSVBlob(filteredData, desiredColumns);
-      const companyBlob = createCSVBlob(companyData, desiredCompanyColumn);
-      const contactBlob2 = createCSVBlob(filteredData, desiredForImport);
-      const projectBlob = createCSVBlob(projectsData, desiredProjectColumns);
-
-      if(user.role === 'agent'){
-        hubkey = user?.franchisee?.hubspot_api_key;
-        dealStage = user?.franchisee?.settings?.dealStageId;
-        if(dealStage && hubkey){
-          await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubkey,dealStage);
-        }else{
-          console.log("Undefined Deal Stage or HubKey ID.");
-        }
-        
-      }else{
-        hubkey = selectedFranchisee?.hubspot_api_key;
-        dealStage = selectedFranchisee?.settings?.dealStageId;
-        if(dealStage && hubkey){
-          await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubkey, dealStage);
-        }else{
-          console.log("Undefined Deal Stage or HubKey ID.");
-        }
-      }
-
-    
-      if(invalidData.length > 0){
-        const invalidContactBlob = createCSVBlob(invalidData, desiredColumns);
-        const link = await uploadInvalidContacts(fileInfo.name, invalidContactBlob);
-        console.log(`Gdrive link: ${link}`);
-        setGdriveLink(link);
-        // setDisplayImportSummary(true);
-      }else{
-        console.log("There is nothing to upload to drive because there are no invalid contacts");
-        // setDisplayImportSummary(true);
-      }
-
-    } catch (error) {
-      console.log(`Error processing files: ${error}`);
-    }
-  }
 
   const getDomainName = (email, website) => {
     const getDomainFromEmail = (email) => {

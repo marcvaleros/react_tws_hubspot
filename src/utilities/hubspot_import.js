@@ -48,8 +48,8 @@ export async function sendToServer(fileName, contactBlob, companyBlob, contactBl
       });
 
       if(res.status === 200){
-        console.log(res.data);
-        console.log(res.message);
+        console.log(`Data from server: ${res.data}`);
+        console.log(`Message from server: ${res.message}`);
         toggleModal("Success");
       }else{
         toggleModal("Failed");
