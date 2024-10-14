@@ -5,7 +5,7 @@ export default function Accordion() {
 
   const versions = [
     {
-      version_title: 'Version 1.1 - October 1X, 2024',
+      version_title: 'Version 1.1 - October 12, 2024',
       subtitle: 'Here\'s what\'s new in Version 1.1 ✨:',
       list: [
         {
