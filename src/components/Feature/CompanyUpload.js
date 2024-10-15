@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { sendToServer, uploadInvalidContacts } from '../../utilities/hubspot_import';
+import { uploadInvalidContacts, sendToServerCompany} from '../../utilities/hubspot_import';
 import Modal from '../../components/modal';
 import FilterModal from '../../components/filterModal';
 import DisplayContactCounts from '../../components/contactCount';
@@ -39,39 +39,29 @@ function CompanyUpload({setLoading}) {
      // eslint-disable-next-line
   }, []); 
 
-  const importFile = async () => {
-    try {
-      let dealStage, hubkey;
-      const createCSVBlob = (data, columns) => {
-        const csvData = Papa.unparse(data, {columns});
-        return new Blob([csvData], {type: 'text/csv;charset=utf-8;' });
-      }
+  const createCSVBlob = (data, columns) => {
+    const csvData = Papa.unparse(data, {columns});
+    return new Blob([csvData], {type: 'text/csv;charset=utf-8;' });
+  }
 
-      const contactBlob = createCSVBlob(filteredData, desiredColumns);
-      const companyBlob = createCSVBlob(companyData, desiredCompanyColumn);
-      const contactBlob2 = createCSVBlob(filteredData, desiredForImport);
+  const importCompanyFile = async () => {
+    try {
+      let hubkey;
+      let contactBlob = createCSVBlob(filteredData, desiredColumns);
 
       if(user.role === 'agent'){
         hubkey = user?.franchisee?.hubspot_api_key;
-        dealStage = user?.franchisee?.settings?.dealStageId;
-        if(dealStage && hubkey){
-          // await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubkey,dealStage);
-          await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, toggleModal, setLoading, hubkey,dealStage);
+        if(hubkey){
+          await sendToServerCompany(fileInfo.name, contactBlob, toggleModal, setLoading, hubkey);
         }else{
-          console.log("Undefined Deal Stage or HubKey ID.");
+          console.log("Undefined HubKey ID.");
         }
-        
       }else{
         hubkey = selectedFranchisee?.hubspot_api_key;
-        dealStage = selectedFranchisee?.settings?.dealStageId;
-        console.log(`Admin - dealStage: ${dealStage}`);
-        
-
-        if(dealStage && hubkey){
-          // await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, projectBlob, toggleModal, setLoading, hubkey, dealStage);
-          await sendToServer(fileInfo.name, contactBlob, companyBlob, contactBlob2, toggleModal, setLoading, hubkey, dealStage);
+        if(hubkey){
+          await sendToServerCompany(fileInfo.name, contactBlob, toggleModal, setLoading, hubkey);
         }else{
-          console.log("Undefined Deal Stage or HubKey ID.");
+          console.log("Undefined HubKey ID.");
         }
       }
 
@@ -81,12 +71,10 @@ function CompanyUpload({setLoading}) {
         const link = await uploadInvalidContacts(fileInfo.name, invalidContactBlob);
         console.log(`Gdrive link: ${link}`);
         setGdriveLink(link);
-        // setDisplayImportSummary(true);
       }else{
         console.log("There is nothing to upload to drive because there are no invalid contacts");
-        // setDisplayImportSummary(true);
       }
-
+      
     } catch (error) {
       console.log(`Error processing files: ${error}`);
     }
@@ -97,10 +85,10 @@ function CompanyUpload({setLoading}) {
     const companyArray = [];
 
     validContacts.forEach((data) => {
-      const domain = getDomainName(data["Contact Email"], data.Website);
-      const companyName = data.Company;
-      const website = data.Website;
-      const email = data.Email;
+      const website = data["Website"];
+      const domain = getDomainName(data["Contact Email"], website);
+      const companyName = data["Company Name"];
+      const email = data["Contact Email"];
 
       if(!uniqueCompanies[companyName]){
         uniqueCompanies[companyName] = {
@@ -137,7 +125,7 @@ function CompanyUpload({setLoading}) {
 
       if(filters.include){ // if we should include the those with zips
         if(filters.zip){
-          isValid = isValid && filters.zipCodes.includes(raw.ZIP);
+          isValid = isValid && filters.zipCodes.includes(raw.Zip);
         }
   
         if(filters.projectType){
@@ -149,7 +137,7 @@ function CompanyUpload({setLoading}) {
         }
       }else{ // if we should exclude  those found in the zips
         if(filters.zip){
-          isValid = isValid && !filters.zipCodes.includes(raw.ZIP);
+          isValid = isValid && !filters.zipCodes.includes(raw.Zip);
         }
   
         if(filters.projectType){
@@ -160,22 +148,19 @@ function CompanyUpload({setLoading}) {
           isValid = isValid && !filters.buildingUses.includes(raw["Building Uses"]);
         }
       }
-      
-
       return isValid;
-
     });
 
     filtered.forEach(contact => {
-      const email = contact.Email;
-      const project = `${contact["Project Title"]}_${contact["Project ID"]}`;
+      const email = contact["Contact Email"];
+      const company = `${contact["Company Name"]}_${contact["Contact Email"]}`;
 
-      const uniqueKey = `${email}_${project}`;
+      const uniqueKey = company;
 
-      if(!email){
-        invalidContacts.push(contact);        //stored in the invalidContacts state
-      }else if(processed.has(uniqueKey)) {
-        duplicateEmailContacts.push(contact); //important to get the total number of duplicated emails in one project
+      if(!email){                             // if there's no email, stire to invalid contacts
+        invalidContacts.push(contact);        // stored in the invalidContacts state
+      }else if(processed.has(uniqueKey)) {    // if already existed in unique set of company contacts
+        duplicateEmailContacts.push(contact); // use to get total number of duplicated emails in one project
       }else{
         validContacts.push(contact);          //stored in the filteredData state
         processed.add(uniqueKey);
@@ -185,7 +170,7 @@ function CompanyUpload({setLoading}) {
     setFilteredData(validContacts);
     setInvalidData(invalidContacts);
     setDuplicateData(duplicateEmailContacts);
-    initializeCompanyData(validContacts);    
+    initializeCompanyData(validContacts);
     setIsFiltered(true);
   }
 
@@ -227,7 +212,7 @@ function CompanyUpload({setLoading}) {
     reader.onload = (e) => {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, {type : 'array'});
-      const sheetName = workbook.SheetNames[1]; //access the second sheet
+      const sheetName = workbook.SheetNames[2]; //access the second sheet
       const worksheet = workbook.Sheets[sheetName];
       const csvData = XLSX.utils.sheet_to_csv(worksheet);
       
@@ -317,11 +302,7 @@ function CompanyUpload({setLoading}) {
     saveAs(blob, `COMPANY_${fileInfo.name}`);
   }
 
-
-  const desiredForImport = ["Name", "Role", "Phone", "Email", "Website", "Address", "City", "State", "ZIP"]; 
-
-  const desiredColumns = ["Contact Name", "Contact Email", "Phone", "Website", "Address","City", "State", "ZIP"];
-
+  const desiredColumns = ["Contact Name", "Contact Email", "Phone", "Website", "Address","City", "State", "Zip"];
   const desiredCompanyColumn = ["Company", "Website", "Domain"];  
 
   return (
@@ -387,7 +368,7 @@ function CompanyUpload({setLoading}) {
 
             <button 
               className={`transition-all ease-in-out bg-hs-orange-light p-4 rounded-md text-hs-background hover:bg-hs-orange ${!isFiltered ? 'opacity-50 cursor-not-allowed' : ''}`} 
-              onClick={importFile} 
+              onClick={importCompanyFile} 
               disabled={!isFiltered}>
               <p className='font-hs-font'>Import File to TWS Hubspot</p>
             </button>
@@ -414,10 +395,11 @@ function CompanyUpload({setLoading}) {
                 }
             </div>
           )}
+
             <div>
               {filteredData.length > 0 && (
                   <div className="overflow-x-auto">
-                    <table className="border border-gray-200 divide-y divide-gray-200 text-[10px] bg-gray-50 cursor-pointer mb-8 ">
+                    <table className="w-full border border-gray-200 divide-y divide-gray-200 text-[10px] bg-gray-50 cursor-pointer mb-8 ">
                       <thead className="bg-gray-100">
                         <tr>
                           {desiredColumns.map((column) => (

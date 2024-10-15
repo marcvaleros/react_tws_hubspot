@@ -45,7 +45,7 @@ function Home() {
             }} 
             className="sr-only peer"
           />
-          <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-orange-500  transition-all"></div>
+          <div className="w-11 h-6 bg-hs-blue rounded-full peer peer-checked:bg-orange-500  transition-all"></div>
           <div className="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all peer-checked:translate-x-full"></div>
         </label>
         <span className="text-sm text-white">{isProject ? 'Project Based Upload' : 'Company Based Upload'}</span>
@@ -55,7 +55,7 @@ function Home() {
       isProject ? (
         <ProjectUpload setLoading={setLoading}/>
       ): (
-        <CompanyUpload />
+        <CompanyUpload setLoading={setLoading}/>
       )
     }
     

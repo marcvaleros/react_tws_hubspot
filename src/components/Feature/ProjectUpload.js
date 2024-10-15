@@ -457,7 +457,7 @@ function ProjectUpload({setLoading}) {
             <div>
               {filteredData.length > 0 && (
                   <div className="overflow-x-auto">
-                    <table className="border border-gray-200 divide-y divide-gray-200 text-[10px] bg-gray-50 cursor-pointer mb-8 ">
+                    <table className="w-full border border-gray-200 divide-y divide-gray-200 text-[10px] bg-gray-50 cursor-pointer mb-8 ">
                       <thead className="bg-gray-100">
                         <tr>
                           {desiredColumns.map((column) => (

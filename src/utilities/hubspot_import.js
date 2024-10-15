@@ -48,8 +48,7 @@ export async function sendToServer(fileName, contactBlob, companyBlob, contactBl
       });
 
       if(res.status === 200){
-        console.log(`Data from server: ${res.data}`);
-        console.log(`Message from server: ${res.message}`);
+        console.log(`Message from server: ${res.data.message}`);
         toggleModal("Success");
       }else{
         toggleModal("Failed");
@@ -64,5 +63,38 @@ export async function sendToServer(fileName, contactBlob, companyBlob, contactBl
     console.log("There's no hubspot api key!");
   }
 }
+
+export async function sendToServerCompany(fileName, contactBlob, toggleModal, setLoading, hubspot_api_key) {
+  let form  = new FormData();
+  form.append('files', contactBlob, 'Construct Connect Company Contacts.csv');
+  form.append('filename', fileName);
+  form.append('hubspot_api_key', hubspot_api_key); 
+
+  if(hubspot_api_key){
+    try {
+      setLoading(true);
+      const res = await axios.post(`${BASE_URL}/upload/companies`, form, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+
+      if(res.status === 200){
+        console.log(`Message from server: ${res.data.message}`);
+        toggleModal("Success");
+      }else{
+        toggleModal("Failed");
+      }
+      
+    } catch (error) {
+      console.log(`Error sending contact and company data to backend server. Error: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  }else{
+    console.log("There's no hubspot api key!");
+  }
+}
+
 
 
