@@ -11,7 +11,7 @@ export async function uploadInvalidContacts(filename, invalidContactBlob){
 
   try {
     const res = await axios.post(`${BASE_URL}/upload-to-drive`, form, {
-      withCredentials: true,
+      // withCredentials: true,
       headers: {
         'Content-Type': 'multipart/form-data',
       }
