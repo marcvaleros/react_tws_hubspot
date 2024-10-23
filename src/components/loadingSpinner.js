@@ -1,10 +1,10 @@
 import React from 'react';
 import WebSocketProgress from './progressBar'
 
-const LoadingSpinner = () => {
+const LoadingSpinner = ({setLoading,toggleModal}) => {
   return (
     <div role="status">
-        <WebSocketProgress/>
+        <WebSocketProgress setLoading={setLoading} toggleModal={toggleModal}/>
     </div>
   );
 };

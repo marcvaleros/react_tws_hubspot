@@ -1,27 +1,34 @@
 import React, { useState, useEffect } from "react";
+import { io } from "socket.io-client"; // Import Socket.IO client
 
-const WebSocketProgress = () => {
+const WebSocketProgress = ({ setLoading, toggleModal }) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // const ws = new WebSocket(`ws://localhost:8080`); 
-    const ws = new WebSocket('wss://react-tws-hubspot-be-a7eecd7171c3.herokuapp.com/');
+    if (progress === 100) {
+      setLoading(false);
+      toggleModal("Success");
+    }
+  }, [progress, setLoading, toggleModal]);
 
-    ws.onopen = () => {
-      console.log('WebSocket connection opened');
-    };
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+  useEffect(() => {
+    // Connect to the Socket.IO server
+    const socket = io(process.env.REACT_APP_BACKEND_URL);
+
+    socket.on('connect', () => {
+      console.log('Socket.IO connection opened');
+    });
+
+    socket.on('job-progress', (data) => {
       setProgress(data.progress); // Update progress from server
-    };
+    });
 
-    ws.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
+    socket.on('disconnect', () => {
+      console.log('Socket.IO connection closed');
+    });
 
     return () => {
-      ws.close(); // Clean up on component unmount
+      socket.disconnect(); // Clean up on component unmount
     };
   }, []);
 

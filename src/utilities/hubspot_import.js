@@ -55,12 +55,11 @@ export async function sendToServer(
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        // withCredentials: true,
       });
 
       if (res.status === 200) {
         console.log(`Data from server: ${JSON.stringify(res.data, null, 2)}`);
-        toggleModal("Success");
+        
       } else {
         console.error(`Failed to upload contacts. Status: ${res.status}`);
         toggleModal("Failed");
@@ -68,8 +67,6 @@ export async function sendToServer(
     } catch (error) {
       console.error(`Error sending contact and company data to backend. Error: ${error?.response?.data || error.message}`);
       toggleModal("Failed");
-    } finally {
-      setLoading(false);
     }
   } else {
     console.warn("No HubSpot API key provided!");
