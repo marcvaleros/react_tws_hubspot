@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { io } from "socket.io-client"; // Import Socket.IO client
+import { io } from "socket.io-client"; 
 
 const WebSocketProgress = ({ setLoading, toggleModal }) => {
   const [progress, setProgress] = useState(0);
@@ -12,7 +12,6 @@ const WebSocketProgress = ({ setLoading, toggleModal }) => {
   }, [progress, setLoading, toggleModal]);
 
   useEffect(() => {
-    // Connect to the Socket.IO server
     const socket = io(process.env.REACT_APP_BACKEND_URL);
 
     socket.on('connect', () => {
@@ -20,7 +19,7 @@ const WebSocketProgress = ({ setLoading, toggleModal }) => {
     });
 
     socket.on('job-progress', (data) => {
-      setProgress(data.progress); // Update progress from server
+      setProgress(data.progress); 
     });
 
     socket.on('disconnect', () => {
@@ -28,7 +27,7 @@ const WebSocketProgress = ({ setLoading, toggleModal }) => {
     });
 
     return () => {
-      socket.disconnect(); // Clean up on component unmount
+      socket.disconnect(); 
     };
   }, []);
 
